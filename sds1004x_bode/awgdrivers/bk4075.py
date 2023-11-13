@@ -8,9 +8,9 @@ Driver for BK Precision BK4075 AWG.
 
 import serial
 import time
-from base_awg import BaseAWG
-import constants
-from exceptions import UnknownChannelError
+from .base_awg import BaseAWG
+from . import constants
+from .exceptions import UnknownChannelError
 
 # Port settings
 BAUD_RATES = (2400, 4800, 9600, 19200)
@@ -55,18 +55,18 @@ class BK4075(BaseAWG):
         self.port = port
         self.baud_rate = baud_rate
         self.timeout = timeout
-    
+
     def connect(self):
         self.ser = serial.Serial(self.port, self.baud_rate, BITS, PARITY, STOP_BITS, timeout=self.timeout)
-    
+
     def disconnect(self):
         self.ser.close()
-        
+
     def send_command(self, cmd):
         self.ser.write(cmd)
         self.ser.write(EOL)
         time.sleep(SLEEP_TIME)
-        
+
     def initialize(self):
         self.connect()
         self.send_command("SYST:SCR ON")
@@ -74,14 +74,14 @@ class BK4075(BaseAWG):
         self.v_out_coeff = 1.0
         self.output_on = DEFAULT_OUTPUT_ON
         self.enable_output(1, self.output_on)
-        
+
     def get_id(self):
         self.ser.reset_input_buffer()
         self.send_command("*IDN?")
         time.sleep(SLEEP_TIME)
         ans = self.ser.read_until(terminator=EOL, size=None)
         return ans.strip()
-        
+
     def enable_output(self, channel=None, on=False):
         """
         Turns the output on or off.
@@ -93,18 +93,18 @@ class BK4075(BaseAWG):
         """
         if channel is not None and channel not in CHANNELS:
             raise UnknownChannelError(CHANNELS_ERROR)
-        
+
         self.output_on = on
-        
+
         if self.output_on:
             self.send_command(":OUTP:STAT ON")
         else:
             self.send_command(":OUTP:STAT OFF")
-            
+
     def set_frequency(self, channel, freq):
         """
         Sets output frequency.
-        
+
         Syntax:
             [:SOURce]:FREQuency[:CW]<ws><frequency>[units]
             [:SOURce]:FREQuency<ws>MINimum|MAXimum
@@ -115,11 +115,11 @@ class BK4075(BaseAWG):
         """
         if channel is not None and channel not in CHANNELS:
             raise UnknownChannelError(CHANNELS_ERROR)
-        
+
         freq_str = "%.10f" % freq
         cmd = ":FREQ %s" % (freq_str)
         self.send_command(cmd)
-        
+
     def set_phase(self, phase):
         """
         BK4075 does not require setting phase.
@@ -129,13 +129,13 @@ class BK4075(BaseAWG):
     def set_wave_type(self, channel, wave_type):
         """
         Sets the output wave type.
-        
+
         Syntax:
             [:SOURce]:FUNCtion[:SHAPe]<WS><OPTION>
         Available functions:
             SINusoid, Square, TRIangle, ARBitrary, PULse
             SIN|TRI|SQU|ARB|PUL
-        Examples: 
+        Examples:
             :FUNC SIN
             :FUNC ARB
         """
@@ -143,14 +143,14 @@ class BK4075(BaseAWG):
             raise UnknownChannelError(CHANNELS_ERROR)
         if not wave_type in constants.WAVE_TYPES:
             raise ValueError("Incorrect wave type.")
-        
+
         cmd = WAVEFORM_COMMANDS[wave_type]
         self.send_command(cmd)
-    
+
     def set_amplitue(self, channel, amplitude):
         """
         Sets output amplitude.
-        
+
         Syntax:
             [:SOURce]:VOLTage:AMPLitude<ws><amplitude>[units]
             [:SOURce]:VOLTage:AMPLitude<ws>MINimum|MAXimum
@@ -161,18 +161,18 @@ class BK4075(BaseAWG):
         """
         if channel is not None and channel not in CHANNELS:
             raise UnknownChannelError(CHANNELS_ERROR)
-        
+
         # Adjust the amplitude to the defined load impedance
         amplitude = amplitude * self.v_out_coeff
-        
+
         amp_str = "%.3f" % amplitude
         cmd = ":VOLT:AMPL %s" % (amp_str)
         self.send_command(cmd)
-    
+
     def set_offset(self, channel, offset):
         """
         Sets DC offset of the output.
-        
+
         Syntax:
             [:SOURce]:VOLTage:OFFSet<ws><offset>[units]
             [:SOURce]:VOLTage:OFFSet<ws>MINimum|MAXimum
@@ -183,22 +183,22 @@ class BK4075(BaseAWG):
         """
         if channel is not None and channel not in CHANNELS:
             raise UnknownChannelError(CHANNELS_ERROR)
-        
-        # Adjust the offset voltage to match the defined load impedance 
+
+        # Adjust the offset voltage to match the defined load impedance
         offset = offset * self.v_out_coeff
-        
+
         cmd = ":VOLT:OFFS %s" % (offset)
         self.send_command(cmd)
-        
+
     def set_load_impedance(self, channel, z):
         """
         Sets load impedance connected to each channel. Default value is 50 Ohms.
         """
         if channel is not None and channel not in CHANNELS:
             raise UnknownChannelError(CHANNELS_ERROR)
-        
+
         self.r_load = z
-        
+
         """
         The voltage amplitude which is requestd from the AWG by the
         oscilloscope is the actual peak-to-peak amplitude.
@@ -209,15 +209,15 @@ class BK4075(BaseAWG):
         be adjusted.
         For example, in order to obtain 1Vp-p on a Hi-Z load, the amplitude
         defined on BK405 must be 0.5Vp-p. For other load impedances it must
-        be adjusted accordingly. 
+        be adjusted accordingly.
         v_out_coeff variable stores the coefficient by which the amplitude
         defined by the oscilloscope will be multiplied before sending it
-        to the AWG. 
+        to the AWG.
         """
         if self.r_load == constants.HI_Z:
             self.v_out_coeff = 0.5
-        else:        
-            self.v_out_coeff = 0.5 * (self.r_load + R_IN) / self.r_load 
+        else:
+            self.v_out_coeff = 0.5 * (self.r_load + R_IN) / self.r_load
 
 if __name__ == '__main__':
-    print "This module shouldn't be run. Run awg_tests.py instead."
+    print("This module shouldn't be run. Run awg_tests.py instead.")
