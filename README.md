@@ -20,6 +20,8 @@ As of January 30, 2019 the program supports the following models:
 
 * **Feeltech FY6600** Another Chinese generator which is widely sold on eBay and AliExpress. It also connects to the PC as a USB serial port.
 
+* **AD9910 Arduino Shield** https://gra-afch.com/catalog/rf-units/dds-ad9910-arduino-shield/
+
 ## Program Structure
 TBD
 
@@ -41,9 +43,9 @@ where
 
 * ```<awg_name>``` is the name of the AWG connected to your PC: ```bk4075```, ```jds6600```, ```fy6600``` or ```dummy```.
 
-* ```<serial_port>``` is the serial port to which your AWG is connected. Usually it will be something like ```/dev/ttyUSB0```. If you use the ```dummy``` generator, you don't have to specify the port.
+* ```<serial_port>``` is the serial port to which your AWG is connected. Usually it will be something like ```/dev/ttyUSB0``` or ```/dev/ttyACM0```. If you use the ```dummy``` generator, you don't have to specify the port.
 
-* ```<baud_rate>``` is the serial baud rate as defined in the AWG settings. Currently only ```bk4075``` supports it. If you don't provide this parameter, ```bk4075``` will use the default baud rate of 19200 bps. Two other AWGs don't require it: ```jds6600``` and ```fy6600``` run always at 115200 bps and the ```dummy``` generator doesn't use a serial port.
+* ```<baud_rate>``` is the serial baud rate as defined in the AWG settings. Currently only ```bk4075``` supports it. If you don't provide this parameter, ```bk4075``` will use the default baud rate of 19200 bps. Two other AWGs don't require it: ```jds6600```, ```fy6600```, and ```ad9910``` run always at 115200 bps and the ```dummy``` generator doesn't use a serial port.
 
 The ```dummy``` generator was added for running this program without connecting a signal generator. The program will emulate a Siglent AWG and the oscilloscope will generate a Bode plot but no commands will be sent to the AWG.
 
@@ -103,6 +105,9 @@ VXI-11 DESTROY_LINK, SCPI command: None
 
 ## Changelog
 
+### 2023-11-13
+
+* The program supports the AD9910 Arduino Shield sold by [GRA & ACFH](https://gra-afch.com/catalog/rf-units/dds-ad9910-arduino-shield/).
 ### 2019-01-30
 
 * The program supports Feeltech FY6600 AWG.
@@ -124,6 +129,8 @@ I'd like to add here more AWGs but it's impossible to have them all at the home 
 * **Dmitry Melnichansky [@4x1md](https://github.com/4x1md)** - Project idea and implementation.
 
 * **Nick Bryant (Dundarave on EEVblog Forum)** - Driver for Feeltech FY6600 AWG.
+
+* **Don F Becker** - Driver for AD9910 Arduino Shield
 
 ## Links
 
