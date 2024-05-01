@@ -7,6 +7,9 @@ Reasons for the fork:
 
 This is a work in progress. This section is to be merged properly in the below readme once work is done.
 
+Status: the SDS824X-HD does initialise the connection, configures the AWG, but then refuses to start the sweep.
+Something messy with SYN/ACK replies. Digging....
+
 # Siglent SDS1004X-E and SDS800X-HD Bode Plot
 
 Bode plot with Siglent SDS1004X-E and SDS800X-HD oscilloscopes and a non-siglent AWG.
