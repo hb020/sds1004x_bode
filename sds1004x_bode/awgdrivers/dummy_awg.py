@@ -8,6 +8,9 @@ from .base_awg import BaseAWG
 
 AWG_ID = "Dummy AWG"
 
+DEBUG_OUT = True
+
+
 class DummyAWG(BaseAWG):
     '''
     Dummy waveform generator driver.
@@ -16,44 +19,56 @@ class DummyAWG(BaseAWG):
     SHORT_NAME = "dummy"
 
     def __init__(self, *args):
-        pass
+        if DEBUG_OUT:
+            print("Dummy: init")
 
     def connect(self):
-        pass
+        if DEBUG_OUT:
+            print("Dummy: connect")
 
     def disconnect(self):
-        pass
+        if DEBUG_OUT:
+            print("Dummy: disconnect")
 
     def initialize(self):
-        pass
+        if DEBUG_OUT:
+            print("Dummy: initialize")
 
     def get_id(self):
         return AWG_ID
 
     def enable_output(self, channel, on):
-        pass
+        if DEBUG_OUT:
+            print(f"Dummy: enable_output(channel: {channel}, on:{on})")
 
     def set_channel(self, chn):
-        pass
+        if DEBUG_OUT:
+            print(f"Dummy: set_channel(channel: {chn})")
 
     def set_output(self, on=False):
-        pass
+        if DEBUG_OUT:
+            print(f"Dummy: set_output(on:{on})")
 
     def set_frequency(self, channel, freq):
-        pass
-
+        if DEBUG_OUT:
+            print(f"Dummy: set_frequency(channel: {channel}, freq:{freq})")
+        
     def set_phase(self, phase):
-        pass
+        if DEBUG_OUT:
+            print(f"Dummy: set_phase(phase: {phase})")
 
     def set_wave_type(self, channel, wvtp):
-        pass
+        if DEBUG_OUT:
+            print(f"Dummy: set_wave_type(channel: {channel}, wavetype:{wvtp})")
 
     def set_amplitude(self, channel, amp):
-        pass
+        if DEBUG_OUT:
+            print(f"Dummy: set_amplitude(channel: {channel}, amplitude:{amp})")
 
     def set_offset(self, channel, offset):
-        pass
+        if DEBUG_OUT:
+            print(f"Dummy: set_offset(channel: {channel}, offset:{offset})")
 
     def set_load_impedance(self, channel, z):
-        pass
-
+        if DEBUG_OUT:
+            print(f"Dummy: set_load_impedance(channel: {channel}, impedance:{z})")
