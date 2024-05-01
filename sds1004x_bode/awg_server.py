@@ -68,7 +68,7 @@ class AwgServer(object):
         self.portmap_on_udp = portmap_on_udp
 
         if awg is None or not isinstance(awg, BaseAWG):
-                raise TypeError("awg variable must be of AWG class.")
+            raise TypeError("awg variable must be of AWG class.")
         self.awg = awg
 
     def create_socket(self, host, port, on_udp):
@@ -261,7 +261,8 @@ class AwgServer(object):
                     break
 
                 # Generate and send response
-                resp_data = self.generate_resp_data(rx_buf, resp)
+                xid = self.get_xid(rx_buf[0x04:])
+                resp_data = self.generate_resp_data(xid, resp)
                 connection.send(resp_data)
 
         # Close connection
@@ -275,7 +276,7 @@ class AwgServer(object):
                 2. VXI-11 procedure id if it is known, None otherwise.
                 3. string containing SCPI command if it exists in the request."""
         # Validate source program id.
-        ## If the request doesn't come from VXI-11 Core (395183), it is ignored.
+        #  If the request doesn't come from VXI-11 Core (395183), it is ignored.
         program_id = self.bytes_to_uint(rx_data[0x10:0x14])
         if program_id != VXI11_CORE_ID:
             return (NOT_VXI11_ERROR, None, None)
@@ -288,10 +289,10 @@ class AwgServer(object):
         # Process the remaining data according to the received VXI-11 request
         if vxi11_procedure == CREATE_LINK:
             cmd_length = self.bytes_to_uint(rx_data[0x38:0x3C])
-            scpi_command = rx_data[0x3C:0x3C+cmd_length]
+            scpi_command = rx_data[0x3C:0x3C + cmd_length]
         elif vxi11_procedure == DEVICE_WRITE:
             cmd_length = self.bytes_to_uint(rx_data[0x3C:0x40])
-            scpi_command = rx_data[0x40:0x40+cmd_length]
+            scpi_command = rx_data[0x40:0x40 + cmd_length]
         elif vxi11_procedure == DEVICE_READ:
             pass
         elif vxi11_procedure == DESTROY_LINK:
@@ -300,7 +301,7 @@ class AwgServer(object):
             status = UNKNOWN_COMMAND_ERROR
             print("Unknown VXI-11 command received. Code %s" % (vxi11_procedure))
 
-        if scpi_command != None:
+        if scpi_command is not None:
             scpi_command = scpi_command.decode('utf-8').strip()
         return (status, vxi11_procedure, scpi_command)
 
@@ -337,6 +338,9 @@ class AwgServer(object):
             data_size = len(rpc_hdr) + len(resp)
             size_hdr = self.generate_packet_size_header(data_size)
             # Merge all the headers
+            # debug: print(f"size_hdr: [{' '.join(format(x, '02x') for x in size_hdr)}]")
+            # debug: print(f"rpc_hdr: [{' '.join(format(x, '02x') for x in rpc_hdr)}]")
+            # debug: print(f"resp: [{' '.join(format(x, '02x') for x in resp)}]")
             resp_data = size_hdr + rpc_hdr + resp
         return resp_data
 
@@ -365,9 +369,9 @@ class AwgServer(object):
         # Reply State: accepted (0)
         hdr += b"\x00\x00\x00\x00"
         # Verifier
-        ## Flavor: AUTH_NULL (0)
+        #  Flavor: AUTH_NULL (0)
         hdr += b"\x00\x00\x00\x00"
-        ## Length: 0
+        #  Length: 0
         hdr += b"\x00\x00\x00\x00"
         # Accept State: RPC executed successfully (0)
         hdr += b"\x00\x00\x00\x00"
@@ -385,19 +389,19 @@ class AwgServer(object):
     def generate_lxi_create_link_response(self):
         """Generates reply to VXI-11 CREATE_LINK request."""
         # VXI-11 response
-        ## Error Code: No Error (0)
+        #  Error Code: No Error (0)
         resp = b"\x00\x00\x00\x00"
-        ## Link ID: 0
+        #  Link ID: 0
         resp += b"\x00\x00\x00\x00"
-        ## Abort Port: 0
+        #  Abort Port: 0
         resp += b"\x00\x00\x00\x00"
-        ## Maximum Receive Size: 8388608=0x00800000
-        #resp += self.uint_to_bytes(8388608)
+        #  Maximum Receive Size: 8388608=0x00800000
+        # resp += self.uint_to_bytes(8388608)
         resp += b"\x00\x80\x00\x00"
         return resp
 
     def generate_lxi_idn_response(self, id_string):
-        ## Error Code: No Error (0)
+        # Error Code: No Error (0)
         resp = b"\x00\x00\x00\x00"
         # Reason: 0x00000004 (END)
         resp += b"\x00\x00\x00\x04"
@@ -418,23 +422,23 @@ class AwgServer(object):
         Converts a sequence of 4 bytes to 32-bit integer. Byte 0 is MSB.
         """
         return int.from_bytes(bytes_seq, "big")
-        #num = ord(bytes_seq[0])
-        #num = num * 0x100 + ord(bytes_seq[1])
-        #num = num * 0x100 + ord(bytes_seq[2])
-        #num = num * 0x100 + ord(bytes_seq[3])
-        #return num
+        # num = ord(bytes_seq[0])
+        # num = num * 0x100 + ord(bytes_seq[1])
+        # num = num * 0x100 + ord(bytes_seq[2])
+        # num = num * 0x100 + ord(bytes_seq[3])
+        # return num
 
     def uint_to_bytes(self, num):
         """
         Converts a 32-bit integer to a sequence of 4 bytes. Byte 0 is MSB.
         """
         return num.to_bytes(4, "big")
-        #byte3 = (num / 0x1000000) & 0xFF
-        #byte2 = (num / 0x10000) & 0xFF
-        #byte1 = (num / 0x100) & 0xFF
-        #byte0 = num & 0xFF
-        #bytes_seq = bytearray((byte3, byte2, byte1, byte0))
-        #return bytes_seq
+        # byte3 = (num / 0x1000000) & 0xFF
+        # byte2 = (num / 0x10000) & 0xFF
+        # byte1 = (num / 0x100) & 0xFF
+        # byte0 = num & 0xFF
+        # bytes_seq = bytearray((byte3, byte2, byte1, byte0))
+        # return bytes_seq
 
     def print_as_hex(self, buf):
         """
@@ -470,6 +474,7 @@ class AwgServer(object):
 
     def __del__(self):
         self.close_sockets()
+
 
 if __name__ == '__main__':
     raise Exception("This module is not for running. Run bode.py instead.")
