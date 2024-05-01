@@ -22,6 +22,13 @@ class AwgFactory(object):
 
     def get_class_by_name(self, short_name):
         return self.awgs[short_name]
+    
+    def get_names(self):
+        out = []
+        for a in self.awgs:
+            out.append(a)
+        return out
+        
 
 # Initialize factory
 awg_factory = AwgFactory()
@@ -30,4 +37,6 @@ awg_factory.add_awg(JDS6600.SHORT_NAME, JDS6600)
 awg_factory.add_awg(BK4075.SHORT_NAME, BK4075)
 awg_factory.add_awg(FY6600.SHORT_NAME, FY6600)
 awg_factory.add_awg(AD9910.SHORT_NAME, AD9910)
+
+    
 

@@ -4,32 +4,29 @@ Created on May 5, 2018
 @author: dima
 '''
 
-import sys
+import argparse
 from awg_server import AwgServer
 from awg_factory import awg_factory
 
 DEFAULT_AWG = "dummy"
 DEFAULT_PORT = "/dev/ttyUSB0"
-DEFAULT_BAUD_RATE = None
+DEFAULT_BAUD_RATE = 115200
 
 if __name__ == '__main__':
+    parser = argparse.ArgumentParser(description="Siglent SDS 800X-HD/1000X-E to non-Siglent AWG bode plot bridge.",
+                                     formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+    parser.add_argument("awg", type=str, nargs='?', default=DEFAULT_AWG, choices=awg_factory.get_names(), help="The AWG to use.")
+    parser.add_argument("port", type=str, nargs='?', default=DEFAULT_PORT, help="The serial port to use.")
+    parser.add_argument("baudrate", type=int, nargs='?', default=DEFAULT_BAUD_RATE, help="The serial port baud rate to use.")
+    parser.add_argument("-udp", action="store_true", default=False, dest="portmap_on_udp", help="Use UDP for the init phase (is needed by SD800X-HD series for example).")
+    args = parser.parse_args()
+
     # Extract AWG name from parameters
-    if len(sys.argv) >= 2:
-        awg_name = sys.argv[1]
-    else:
-        awg_name = DEFAULT_AWG
-
+    awg_name = args.awg
     # Extract port name from parameters
-    if len(sys.argv) >= 3:
-        awg_port = sys.argv[2]
-    else:
-        awg_port = DEFAULT_PORT
-
+    awg_port = args.port
     # Extract AWG port baud rate from parameters
-    if len(sys.argv) == 4:
-        awg_baud_rate = int(sys.argv[3])
-    else:
-        awg_baud_rate = DEFAULT_BAUD_RATE
+    awg_baud_rate = args.baudrate
 
     # Initialize AWG
     print("Initializing AWG...")
@@ -42,7 +39,7 @@ if __name__ == '__main__':
     # Run AWG server
     server = None
     try:
-        server = AwgServer(awg)
+        server = AwgServer(awg, portmap_on_udp=args.portmap_on_udp)
         server.start()
 
     except KeyboardInterrupt:
