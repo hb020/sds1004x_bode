@@ -45,7 +45,7 @@ if __name__ == '__main__':
     awg.set_wave_type(1, constants.SINE)
     awg.set_frequency(1, 7257.865243)
     awg.set_load_impedance(1, 50)
-    awg.set_amplitue(1, 0.722)
+    awg.set_amplitude(1, 0.722)
     awg.set_offset(1, 0.041)
 
     try:
@@ -53,7 +53,7 @@ if __name__ == '__main__':
         awg.set_wave_type(2, constants.SINE)
         awg.set_frequency(2, 35564.0493)
         awg.set_load_impedance(2, constants.HI_Z)
-        awg.set_amplitue(2, 1.5)
+        awg.set_amplitude(2, 1.5)
         awg.set_offset(2, -0.35)
     except UnknownChannelError:
         print "This AWG doesn't have second channel."

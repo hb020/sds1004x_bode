@@ -165,7 +165,7 @@ class FY6600(BaseAWG):
             cmd = "WFW00"
             self.send_command(cmd)
 
-    def set_amplitue(self, channel, amplitude):
+    def set_amplitude(self, channel, amplitude):
         """
         Sets amplitude of the selected channel.
 

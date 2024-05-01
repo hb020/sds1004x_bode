@@ -107,7 +107,7 @@ class AD9910(BaseAWG):
         """
         pass
 
-    def set_amplitue(self, channel, amplitude):
+    def set_amplitude(self, channel, amplitude):
         """
         Sets output amplitude.
         """

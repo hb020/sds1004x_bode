@@ -162,7 +162,7 @@ class JDS6600(BaseAWG):
             cmd = ":w22=%s." % wave_type
             self.send_command(cmd)
 
-    def set_amplitue(self, channel, amplitude):
+    def set_amplitude(self, channel, amplitude):
         """
         Sets amplitude of the selected channel.
 

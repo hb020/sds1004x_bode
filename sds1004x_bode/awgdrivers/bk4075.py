@@ -147,7 +147,7 @@ class BK4075(BaseAWG):
         cmd = WAVEFORM_COMMANDS[wave_type]
         self.send_command(cmd)
 
-    def set_amplitue(self, channel, amplitude):
+    def set_amplitude(self, channel, amplitude):
         """
         Sets output amplitude.
 

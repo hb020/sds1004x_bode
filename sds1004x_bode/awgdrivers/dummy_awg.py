@@ -48,7 +48,7 @@ class DummyAWG(BaseAWG):
     def set_wave_type(self, channel, wvtp):
         pass
 
-    def set_amplitue(self, channel, amp):
+    def set_amplitude(self, channel, amp):
         pass
 
     def set_offset(self, channel, offset):

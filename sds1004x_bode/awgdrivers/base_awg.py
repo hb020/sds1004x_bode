@@ -37,7 +37,7 @@ class BaseAWG(object):
     def set_wave_type(self, channel, wave_type):
         raise NotImplementedError()
 
-    def set_amplitue(self, channel, amplitude):
+    def set_amplitude(self, channel, amplitude):
         raise NotImplementedError()
 
     def set_offset(self, channel, offset):

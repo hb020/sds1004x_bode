@@ -76,7 +76,7 @@ class CommandParser(object):
 
             elif args[n] == "AMP":
                 ampl = float(args[n+1])
-                self.awg.set_amplitue(channel, ampl)
+                self.awg.set_amplitude(channel, ampl)
                 n += 2
 
             elif args[n] == "OFST":
