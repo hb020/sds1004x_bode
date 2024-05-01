@@ -1,15 +1,18 @@
-# TEMPORARY STUFF:
+# TEMPORARY STUFF
 
 Reasons for the fork: 
+
 * add Rigol DG992, via ethernet link
 * make compatible with SDS824X-HD
 
 This is a work in progress. This section is to be merged properly in the below readme once work is done.
 
-# Siglent SDS1004X-E Bode Plot
-Bode plot with Siglent SDS1004X-E oscilloscopes and a non-siglent AWG.
+# Siglent SDS1004X-E and SDS800X-HD Bode Plot
+
+Bode plot with Siglent SDS1004X-E and SDS800X-HD oscilloscopes and a non-siglent AWG.
 
 ## Overview
+
 At a certain point after getting the SDG1204X-E oscilloscope I started to wonder if it might be possible to use the Bode plot function with a non-Siglent waveform generator. After some hours of researching and reverse engineering I wrote this Python program which is a small server which emulates Siglent arbitrary waveform generator.
 
 The oscilloscope connects using LAN to a PC running this program. The program makes the oscilloscope think that it communicates with a genuine Siglent signal generator. The program extracts the commands sent to the generator, parses them and translates to the command set, which can be understood by the connected to the PC non-Siglent generator.
@@ -20,7 +23,7 @@ Current version of the program was tested under Linux only. Later, I'll test it 
 
 ## Supported AWG Models
 
-As of January 30, 2019 the program supports the following models:
+As of January 2024 the program supports the following models:
 
 * **BK Precision BK4075** One channel 25MHz AWG. Requires a RS-232 serial port for the connection to a PC. It is compatible with the SCPI 1992.0 standard.
 
@@ -31,13 +34,16 @@ As of January 30, 2019 the program supports the following models:
 * **AD9910 Arduino Shield** https://gra-afch.com/catalog/rf-units/dds-ad9910-arduino-shield/
 
 ## Program Structure
+
 TBD
 
 ## Oscilloscope Configuration
+
 Before starting the program you have to tell the oscilloscope how to connect to the waveform generator. Connect your oscilloscope to the same network where your PC is connected. Then go to ```Configure => AWG I/O``` in the Bode plot settings. Define LAN connection and the IP addres of your PC as the AWG IP. After starting the program you can press ```Test Connection``` button to test the communication between the oscilloscope and the PC.
 
 ## Running The Program
-To run this program you must have Python 3.11+ installed.
+
+To run this program you must have Python 3.11+ installed. Python 2.7 is not supported anymore.
 
 The source code is located in the [```sds1004x_bode```](https://github.com/4x1md/sds1004x_bode/tree/master/sds1004x_bode) directory of this repository.
 
@@ -45,7 +51,7 @@ Python ```sockets``` requires elevated privileges in Linux, therefore the progra
 
 The program must be run in Linux terminal. The file to be run is ```bode.py```. In order to run it, change current path to the directory where you downloaded the source code. Then write the following command:
 
-```sudo python bode.py <awg_name> <serial_port> <baud_rate>```
+```sudo python bode.py <awg_name> <serial_port> <baud_rate> [-udp] [-h]```
 
 where
 
@@ -56,6 +62,10 @@ where
 * ```<baud_rate>``` is the serial baud rate as defined in the AWG settings. Currently only ```bk4075``` supports it. If you don't provide this parameter, ```bk4075``` will use the default baud rate of 19200 bps. Two other AWGs don't require it: ```jds6600```, ```fy6600```, and ```ad9910``` run always at 115200 bps and the ```dummy``` generator doesn't use a serial port.
 
 The ```dummy``` generator was added for running this program without connecting a signal generator. The program will emulate a Siglent AWG and the oscilloscope will generate a Bode plot but no commands will be sent to the AWG.
+
+Use ```-udp``` if your scope is a SDS800X-HD, or another new Siglent scope.
+
+Use ```-h``` for help text.
 
 If the program starts successfully, you'll see the following output:
 
@@ -113,9 +123,14 @@ VXI-11 DESTROY_LINK, SCPI command: None
 
 ## Changelog
 
+### 2024-05-01
+
+* The program support SDS800X-HD (that uses UDP instead of TCP for the port mapping)
+
 ### 2023-11-13
 
 * The program supports the AD9910 Arduino Shield sold by [GRA & ACFH](https://gra-afch.com/catalog/rf-units/dds-ad9910-arduino-shield/).
+
 ### 2019-01-30
 
 * The program supports Feeltech FY6600 AWG.
@@ -146,6 +161,7 @@ I'd like to add here more AWGs but it's impossible to have them all at the home 
 2. [Running the script with SDS1204X-E and JDS6600 AWG](https://www.youtube.com/watch?v=7PvueUHAJ78) on YouTube (best viewed in 1080p quality).
 
 ## Questions? Suggestions?
+
 You are more than welcome to contact me with any questions, suggestions or propositions regarding this project. You can:
 
 1. Visit [my QRZ.COM page](https://www.qrz.com/db/4X1MD)
