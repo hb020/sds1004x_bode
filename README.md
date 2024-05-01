@@ -1,3 +1,11 @@
+# TEMPORARY STUFF:
+
+Reasons for the fork: 
+* add Rigol DG992, via ethernet link
+* make compatible with SDS824X-HD
+
+This is a work in progress. This section is to be merged properly in the below readme once work is done.
+
 # Siglent SDS1004X-E Bode Plot
 Bode plot with Siglent SDS1004X-E oscilloscopes and a non-siglent AWG.
 
@@ -29,7 +37,7 @@ TBD
 Before starting the program you have to tell the oscilloscope how to connect to the waveform generator. Connect your oscilloscope to the same network where your PC is connected. Then go to ```Configure => AWG I/O``` in the Bode plot settings. Define LAN connection and the IP addres of your PC as the AWG IP. After starting the program you can press ```Test Connection``` button to test the communication between the oscilloscope and the PC.
 
 ## Running The Program
-To run this program you must have Python 2.7 installed.
+To run this program you must have Python 3.11+ installed.
 
 The source code is located in the [```sds1004x_bode```](https://github.com/4x1md/sds1004x_bode/tree/master/sds1004x_bode) directory of this repository.
 
