@@ -11,7 +11,7 @@ from .exceptions import UnknownChannelError
 
 TIMEOUT = 5
 
-DEBUG_OUT = True
+DEBUG_OUT = False
 
 CHANNELS = (0, 1, 2)
 CHANNELS_ERROR = "DG800 has only 2 channels."
