@@ -127,7 +127,7 @@ VXI-11 DESTROY_LINK, SCPI command: None
 
 ### 2024-05-01
 
-* The program support SDS800X-HD (that uses UDP instead of TCP for the port mapping)
+* The program supports the SDS800X-HD series (that uses UDP instead of TCP for the port mapping, and has trouble with re-using the VXI port)
 
 ### 2023-11-13
 
