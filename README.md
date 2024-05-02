@@ -3,12 +3,11 @@
 Reasons for the fork: 
 
 * add Rigol DG992, via ethernet link
-* make compatible with SDS824X-HD
+* make compatible with SDS824X-HD (DONE)
 
 This is a work in progress. This section is to be merged properly in the below readme once work is done.
 
-Status: the SDS824X-HD does initialise the connection, configures the AWG, but then refuses to start the sweep.
-Something messy with SYN/ACK replies. Digging....
+Status: communication with SDS824X-HD works: initialises and runs sweep. Needed port changes and udp.
 
 # Siglent SDS1004X-E and SDS800X-HD Bode Plot
 

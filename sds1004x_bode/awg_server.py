@@ -14,7 +14,9 @@ from command_parser import CommandParser
 #  VXI-11 port can be changed to another value.
 HOST = '0.0.0.0'
 RPCBIND_PORT = 111
-VXI11_PORT = 703
+VXI11_PORTRANGE_START = 9010
+VXI11_PORTRANGE_END = 9019
+
 
 # AWG ID to send to the oscilloscope
 #  Examples: SDG SDG2042X SDG0000X SDG2000X
@@ -45,7 +47,7 @@ OK = 0
 
 class AwgServer(object):
 
-    def __init__(self, awg, host=None, rpcbind_port=None, vxi11_port=None, portmap_on_udp=True):
+    def __init__(self, awg, host=None, rpcbind_port=None, vxi11_portrange_start=None, vxi11_portrange_end=None, portmap_on_udp=True):
         if host is not None:
             self.host = host
         else:
@@ -58,12 +60,21 @@ class AwgServer(object):
         else:
             self.rpcbind_port = RPCBIND_PORT
 
-        if not isinstance(vxi11_port, (int, type(None))):
-            raise TypeError("vxi11_port must be an integer.")
-        if vxi11_port is not None:
-            self.vxi11_port = vxi11_port
+        if not isinstance(vxi11_portrange_start, (int, type(None))):
+            raise TypeError("vxi11_port range start must be an integer.")
+        if vxi11_portrange_start is not None:
+            self.vxi11_portrange_start = vxi11_portrange_start
         else:
-            self.vxi11_port = VXI11_PORT
+            self.vxi11_portrange_start = VXI11_PORTRANGE_START
+
+        if not isinstance(vxi11_portrange_end, (int, type(None))):
+            raise TypeError("vxi11_port range start must be an integer.")
+        if vxi11_portrange_end is not None:
+            self.vxi11_portrange_end = vxi11_portrange_end
+        else:
+            self.vxi11_portrange_end = VXI11_PORTRANGE_END
+
+        self.vxi11_port = self.vxi11_portrange_start
             
         self.portmap_on_udp = portmap_on_udp
 
@@ -77,7 +88,7 @@ class AwgServer(object):
             sock.bind((host, port))
         else:
             sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-            # Disable the TIME_WAIT state of connected sockets.
+            # Disable the TIME_WAIT state of connected sockets, and allow reuse, as I switch ports rather quickly
             sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
             sock.bind((host, port))
             sock.listen(1)  # Become a server socket, maximum 1 connection
@@ -124,9 +135,19 @@ class AwgServer(object):
             if res != OK:
                 print("Incompatible RPCBIND request.")
                 continue
+            print("Waiting for LXI request.")
+            
             self.process_lxi_requests()
-        self.close_lxi_sockets()
-
+            
+            # every request must go to a new socket (as SDS800X-HD requires)
+            self.close_lxi_sockets()
+            self.vxi11_port += 1
+            if self.vxi11_port > self.vxi11_portrange_end:
+                self.vxi11_port = self.vxi11_portrange_start
+            print(f"VXI-11 moving to TCP port {self.vxi11_port}")
+            self.lxi_socket = self.create_socket(self.host, self.vxi11_port, False)
+            
+        # This code will never be reached
         # Disconnect from the external AWG
         self.signal_gen.connect()
 
@@ -138,7 +159,7 @@ class AwgServer(object):
         rx_data = connection.recv(128)
         if len(rx_data) > 4:
             rx_data = rx_data[0x04:]  # start from XID, as with UDP
-            print("\nIncoming connection from %s:%s." % (address[0], address[1]))
+            print("Incoming connection from %s:%s." % (address[0], address[1]))
             # Validate the request.
             #  If the request is not GETPORT or does not come from VXI-11 Core (395183),
             #  we have nothing to do wit it
