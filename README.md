@@ -15,7 +15,7 @@ Bode plot with Siglent SDS1000X-E and SDS800X-HD oscilloscopes series and a non-
 
 ## Overview
 
-At a certain point after getting the SDG1204X-E oscilloscope I started to wonder if it might be possible to use the Bode plot function with a non-Siglent waveform generator. After some hours of researching and reverse engineering I wrote this Python program which is a small server which emulates Siglent arbitrary waveform generator.
+At a certain point after getting the SDS1204X-E oscilloscope I started to wonder if it might be possible to use the Bode plot function with a non-Siglent waveform generator. After some hours of researching and reverse engineering I wrote this Python program which is a small server which emulates Siglent arbitrary waveform generator.
 
 The oscilloscope connects using LAN to a PC running this program. The program makes the oscilloscope think that it communicates with a genuine Siglent signal generator. The program extracts the commands sent to the generator, parses them and translates to the command set, which can be understood by the connected to the PC non-Siglent generator.
 
@@ -77,8 +77,8 @@ AWG: jds6600
 Port: /dev/ttyUSB0
 Starting AWG server...
 Listening on 0.0.0.0
-RPCBIND on port 111
-VXI-11 on port 703
+RPCBIND on TCP port 111
+VXI-11 on TCP port 9009
 Creating sockets...
 
 Waiting for connection request...
@@ -92,35 +92,37 @@ VXI-11 CREATE_LINK, SCPI command: inst0
 VXI-11 DEVICE_WRITE, SCPI command: IDN-SGLT-PRI?
 VXI-11 DEVICE_READ, SCPI command: None
 VXI-11 DESTROY_LINK, SCPI command: None
+VXI-11 moving to TCP port 9010
 
 Waiting for connection request...
 
 Incoming connection from 192.168.14.27:48446.
 VXI-11 CREATE_LINK, SCPI command: inst0
-VXI-11 DEVICE_WRITE, SCPI command: C1:OUTP LOAD,50;BSWV WVTP,SINE,PHSE,0,FRQ,510,AMP,1,OFST,0;OUTP ON
+VXI-11 DEVICE_WRITE, SCPI command: C1:OUTP LOAD,50;BSWV WVTP,SINE,PHSE,0,FRQ,15000,AMP,2,OFST,0;OUTP ON
 VXI-11 DESTROY_LINK, SCPI command: None
+VXI-11 moving to TCP port 9009
 
 Waiting for connection request...
-
 Incoming connection from 192.168.14.27:50264.
 VXI-11 CREATE_LINK, SCPI command: inst0
 VXI-11 DEVICE_WRITE, SCPI command: C1:BSWV?
 VXI-11 DEVICE_READ, SCPI command: None
 VXI-11 DESTROY_LINK, SCPI command: None
+VXI-11 moving to TCP port 9010
 
 Waiting for connection request...
-
 Incoming connection from 192.168.14.27:55976.
 VXI-11 CREATE_LINK, SCPI command: inst0
 VXI-11 DEVICE_WRITE, SCPI command: C1:BSWV FRQ,10
 VXI-11 DESTROY_LINK, SCPI command: None
+VXI-11 moving to TCP port 9009
 
 Waiting for connection request...
-
 Incoming connection from 192.168.14.27:48088.
 VXI-11 CREATE_LINK, SCPI command: inst0
 VXI-11 DEVICE_WRITE, SCPI command: C1:BSWV FRQ,10
 VXI-11 DESTROY_LINK, SCPI command: None
+VXI-11 moving to TCP port 9010
 ```
 
 ## Changelog

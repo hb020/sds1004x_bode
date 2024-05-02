@@ -135,7 +135,7 @@ class AwgServer(object):
             if res != OK:
                 print("Incompatible RPCBIND request.")
                 continue
-            print("Waiting for LXI request.")
+            # print("Waiting for LXI request.")
             
             self.process_lxi_requests()
             
