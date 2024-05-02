@@ -48,7 +48,7 @@ The program must be run in Linux terminal. The file to be run is ```bode.py```. 
 
 where
 
-* ```<awg_name>``` is the name of the AWG connected to your PC:  ```jds6600```, ```bk4075```, ```fy6600```, ```ad9910```, ```dg800``` or ```dummy```.
+* ```<awg_name>``` is the name of the AWG connected to your PC:  ```jds6600```, ```bk4075```, ```fy6600```, ```ad9910```, ```dg800``` or ```dummy```. Note that ```dg800``` might also work for other SCPI 1992.0 standard compatible AWGs.
 
 * ```<port>``` is the port to which your AWG is connected. The type depends on you AWG, see the explanations above. For serial port AWGs, it will be something like ```/dev/ttyUSB0``` or ```/dev/ttyACM0```. If you use the ```dummy``` generator, you don't have to specify the port. If you use the ```dg800```, you must specify a Visa compatible connection string, like ```TCPIP::192.168.001.204::INSTR``` or ```USB0::9893::6453::DG1234567890A::0::INSTR```
 
