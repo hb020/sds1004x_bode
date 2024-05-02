@@ -126,7 +126,7 @@ class FY6600(BaseAWG):
             self.send_command(cmd)
 
 
-    def set_phase(self, phase):
+    def set_phase(self, channel, phase):
         """
         Sends the phase setting command to the generator.
         The phase is set on channel 2 only.

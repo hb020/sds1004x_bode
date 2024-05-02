@@ -6,39 +6,50 @@ Created on June 1, 2018
 @summary: Tester module which tests AWG drivers.
 '''
 
-from sds1004x_bode.awgdrivers.exceptions import UnknownChannelError
-from sds1004x_bode.awgdrivers import constants
-from sds1004x_bode.awg_factory import awg_factory
+# stuff needed to get the modules from the parent directory
+import sys
+sys.path.insert(0, '..')
+
+from awgdrivers.exceptions import UnknownChannelError
+from awgdrivers import constants
+from awg_factory import awg_factory
 
 # Port settings constants
-PORT = "/dev/ttyUSB0"
 TIMEOUT = 5
 
 if __name__ == '__main__':
 
-    #awg_name = "dummy"
-    #baud = None
+    # awg_name = "dummy"
+    # port = None
+    # baud = None
 
-    #awg_name = "jds6600"
-    #baud = 115200
+    # awg_name = "jds6600"
+    # port = "/dev/ttyUSB0"
+    # baud = 115200
 
-    awg_name = "fy6600"
-    baud = 19200
+    # awg_name = "fy6600"
+    # port = "/dev/ttyUSB0"
+    # baud = 19200
 
-    #awg_name = "bk4075"
-    #baud = 19200
-
+    # awg_name = "bk4075"
+    # port = "/dev/ttyUSB0"
+    # baud = 19200
+    
+    awg_name = "dg800"
+    port = "TCPIP::192.168.007.204::INSTR"
+    baud = None
+    
     awg_class = awg_factory.get_class_by_name(awg_name)
 
-    awg = awg_class(PORT, baud, TIMEOUT)
+    awg = awg_class(port, baud, TIMEOUT)
     awg.initialize()
 
     # Get AWG id
     awg_id = awg.get_id()
-    print "AWG id: %s" % (awg_id)
+    print(f"AWG id: {awg_id}")
 
     # Output off
-    print "Setting output to off."
+    print("Setting output to off.")
     awg.enable_output(0, False)
 
     # Channel 1: 257.86Hz, 1Vpp, offset 0.5V
@@ -56,13 +67,12 @@ if __name__ == '__main__':
         awg.set_amplitude(2, 1.5)
         awg.set_offset(2, -0.35)
     except UnknownChannelError:
-        print "This AWG doesn't have second channel."
+        print("This AWG doesn't have second channel.")
 
     # Output on
-    print "Setting output to on."
+    print("Setting output to on.")
     awg.enable_output(0, True)
 
     # Disconnect
-    print "Disconnecting from the AWG."
+    print("Disconnecting from the AWG.")
     awg.disconnect()
-

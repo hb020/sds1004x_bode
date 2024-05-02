@@ -121,7 +121,7 @@ class JDS6600(BaseAWG):
             cmd = ":w24=%s,0." % freq_str
             self.send_command(cmd)
 
-    def set_phase(self, phase):
+    def set_phase(self, channel, phase):
         """
         Sends the phase setting command to the generator.
         The phase is set on channel 2 only.

@@ -1,14 +1,3 @@
-# TEMPORARY STUFF
-
-Reasons for the fork: 
-
-* add Rigol DG992, via ethernet link
-* make compatible with SDS824X-HD (DONE)
-
-This is a work in progress. This section is to be merged properly in the below readme once work is done.
-
-Status: communication with SDS824X-HD works: initialises and runs sweep. Needed port changes and udp.
-
 # Siglent SDS1000X-E and SDS800X-HD series Bode Plot
 
 Bode plot with Siglent SDS1000X-E and SDS800X-HD oscilloscopes series and a non-siglent AWG.
@@ -19,13 +8,15 @@ At a certain point after getting the SDS1204X-E oscilloscope I started to wonder
 
 The oscilloscope connects using LAN to a PC running this program. The program makes the oscilloscope think that it communicates with a genuine Siglent signal generator. The program extracts the commands sent to the generator, parses them and translates to the command set, which can be understood by the connected to the PC non-Siglent generator.
 
-The program is written in Python and uses ```sockets``` library to connect to the oscilloscope and ```serial``` library for connecting to AWG.
+The program is written in Python and uses ```sockets``` library to connect to the oscilloscope and ```serial``` library for connecting to serial AWGs, and the ```PyVISA-py``` library for connecting to others.
 
-Current version of the program was tested under Linux only. Later, I'll test it under Windows too.
+Current version of the program was tested under Linux and MacOS only. Later, I'll test it under Windows too.
 
 ## Supported AWG Models
 
-As of January 2024 the program supports the following models:
+As of May 2024 the program supports the following models:
+
+* **Rigol DG800/DG900 series (like DG992)** When "liberated", this is a 2 channel 100MHz AWG with USB and (with the suitable adapter) ethernet interface. It is somewhat compatible with the SCPI 1992.0 standard. You must provide a Visa compatible connection string as ```port```. See below.
 
 * **BK Precision BK4075** One channel 25MHz AWG. Requires a RS-232 serial port for the connection to a PC. It is compatible with the SCPI 1992.0 standard.
 
@@ -33,7 +24,7 @@ As of January 2024 the program supports the following models:
 
 * **Feeltech FY6600** Another Chinese generator which is widely sold on eBay and AliExpress. It also connects to the PC as a USB serial port.
 
-* **AD9910 Arduino Shield** https://gra-afch.com/catalog/rf-units/dds-ad9910-arduino-shield/
+* **AD9910 Arduino Shield** https://gra-afch.com/catalog/rf-units/dds-ad9910-arduino-shield/. It also connects to the PC as a USB serial port.
 
 ## Program Structure
 
@@ -53,15 +44,15 @@ Python ```sockets``` requires elevated privileges in Linux, therefore the progra
 
 The program must be run in Linux terminal. The file to be run is ```bode.py```. In order to run it, change current path to the directory where you downloaded the source code. Then write the following command:
 
-```sudo python bode.py <awg_name> <serial_port> <baud_rate> [-udp] [-h]```
+```sudo python bode.py <awg_name> [<port>] [<baud_rate>] [-udp] [-h]```
 
 where
 
 * ```<awg_name>``` is the name of the AWG connected to your PC: ```bk4075```, ```jds6600```, ```fy6600``` or ```dummy```.
 
-* ```<serial_port>``` is the serial port to which your AWG is connected. Usually it will be something like ```/dev/ttyUSB0``` or ```/dev/ttyACM0```. If you use the ```dummy``` generator, you don't have to specify the port.
+* ```<port>``` is the port to which your AWG is connected. The type depends on you AWG, see the explanations above. For serial port AWGs, it will be something like ```/dev/ttyUSB0``` or ```/dev/ttyACM0```. If you use the ```dummy``` generator, you don't have to specify the port. If you use the DG800, you must specify a Visa compatible connection string, like ```TCPIP::192.168.001.204::INSTR``` or ```USB0::9893::6453::DG1234567890A::0::INSTR```
 
-* ```<baud_rate>``` is the serial baud rate as defined in the AWG settings. Currently only ```bk4075``` supports it. If you don't provide this parameter, ```bk4075``` will use the default baud rate of 19200 bps. Two other AWGs don't require it: ```jds6600```, ```fy6600```, and ```ad9910``` run always at 115200 bps and the ```dummy``` generator doesn't use a serial port.
+* ```<baud_rate>``` The serial baud rate as defined in the AWG settings. Currently only ```bk4075``` supports it. If you don't provide this parameter, ```bk4075``` will use the default baud rate of 19200 bps. Two other AWGs don't require it: ```jds6600```, ```fy6600```, and ```ad9910``` run always at 115200 bps and the ```dummy``` generator doesn't use a serial port.
 
 The ```dummy``` generator was added for running this program without connecting a signal generator. The program will emulate a Siglent AWG and the oscilloscope will generate a Bode plot but no commands will be sent to the AWG.
 

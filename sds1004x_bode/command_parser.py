@@ -86,7 +86,7 @@ class CommandParser(object):
 
             elif args[n] == "PHSE":
                 phase = float(args[n+1])
-                self.awg.set_phase(phase)
+                self.awg.set_phase(channel, phase)
                 n += 2
 
             else:

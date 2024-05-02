@@ -41,19 +41,11 @@ class DummyAWG(BaseAWG):
         if DEBUG_OUT:
             print(f"Dummy: enable_output(channel: {channel}, on:{on})")
 
-    def set_channel(self, chn):
-        if DEBUG_OUT:
-            print(f"Dummy: set_channel(channel: {chn})")
-
-    def set_output(self, on=False):
-        if DEBUG_OUT:
-            print(f"Dummy: set_output(on:{on})")
-
     def set_frequency(self, channel, freq):
         if DEBUG_OUT:
             print(f"Dummy: set_frequency(channel: {channel}, freq:{freq})")
         
-    def set_phase(self, phase):
+    def set_phase(self, channel, phase):
         if DEBUG_OUT:
             print(f"Dummy: set_phase(phase: {phase})")
 

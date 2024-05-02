@@ -10,15 +10,15 @@ from awg_factory import awg_factory
 
 DEFAULT_AWG = "dummy"
 DEFAULT_PORT = "/dev/ttyUSB0"
-DEFAULT_BAUD_RATE = 115200
+DEFAULT_BAUD_RATE = 19200
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description="Siglent SDS 800X-HD/1000X-E to non-Siglent AWG bode plot bridge.",
                                      formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     parser.add_argument("awg", type=str, nargs='?', default=DEFAULT_AWG, choices=awg_factory.get_names(), help="The AWG to use.")
-    parser.add_argument("port", type=str, nargs='?', default=DEFAULT_PORT, help="The serial port to use.")
-    parser.add_argument("baudrate", type=int, nargs='?', default=DEFAULT_BAUD_RATE, help="The serial port baud rate to use.")
-    parser.add_argument("-udp", action="store_true", default=False, dest="portmap_on_udp", help="Use UDP for the init phase (is needed by SD800X-HD series for example).")
+    parser.add_argument("port", type=str, nargs='?', default=DEFAULT_PORT, help="The port to use. Either a serial port, or a Visa compatible connection string.")
+    parser.add_argument("baudrate", type=int, nargs='?', default=DEFAULT_BAUD_RATE, help="When using serial, baud rate to use.")
+    parser.add_argument("-udp", action="store_true", default=False, dest="portmap_on_udp", help="Use UDP for the init phase (is needed by SDS800X-HD series for example).")
     args = parser.parse_args()
 
     # Extract AWG name from parameters

@@ -11,6 +11,8 @@ from awgdrivers.jds6600 import JDS6600
 from awgdrivers.bk4075 import BK4075
 from awgdrivers.fy6600 import FY6600
 from awgdrivers.ad9910 import AD9910
+from awgdrivers.dg800 import RigolDG800
+
 
 class AwgFactory(object):
 
@@ -37,6 +39,4 @@ awg_factory.add_awg(JDS6600.SHORT_NAME, JDS6600)
 awg_factory.add_awg(BK4075.SHORT_NAME, BK4075)
 awg_factory.add_awg(FY6600.SHORT_NAME, FY6600)
 awg_factory.add_awg(AD9910.SHORT_NAME, AD9910)
-
-    
-
+awg_factory.add_awg(RigolDG800.SHORT_NAME, RigolDG800)

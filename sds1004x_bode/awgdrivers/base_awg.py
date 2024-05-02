@@ -31,7 +31,7 @@ class BaseAWG(object):
     def set_frequency(self, channel, freq):
         raise NotImplementedError()
 
-    def set_phase(self, phase):
+    def set_phase(self, channel, phase):
         raise NotImplementedError()
 
     def set_wave_type(self, channel, wave_type):

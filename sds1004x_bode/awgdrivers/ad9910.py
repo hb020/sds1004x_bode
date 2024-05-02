@@ -95,7 +95,7 @@ class AD9910(BaseAWG):
         print(cmd)
         self.send_command(cmd.encode('utf-8'))
 
-    def set_phase(self, phase):
+    def set_phase(self, channel, phase):
         """
         AD9910 does not require setting phase.
         """
