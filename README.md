@@ -95,7 +95,6 @@ VXI-11 DESTROY_LINK, SCPI command: None
 VXI-11 moving to TCP port 9010
 
 Waiting for connection request...
-
 Incoming connection from 192.168.14.27:48446.
 VXI-11 CREATE_LINK, SCPI command: inst0
 VXI-11 DEVICE_WRITE, SCPI command: C1:OUTP LOAD,50;BSWV WVTP,SINE,PHSE,0,FRQ,15000,AMP,2,OFST,0;OUTP ON
