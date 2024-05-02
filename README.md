@@ -9,9 +9,9 @@ This is a work in progress. This section is to be merged properly in the below r
 
 Status: communication with SDS824X-HD works: initialises and runs sweep. Needed port changes and udp.
 
-# Siglent SDS1004X-E and SDS800X-HD Bode Plot
+# Siglent SDS1000X-E and SDS800X-HD series Bode Plot
 
-Bode plot with Siglent SDS1004X-E and SDS800X-HD oscilloscopes and a non-siglent AWG.
+Bode plot with Siglent SDS1000X-E and SDS800X-HD oscilloscopes series and a non-siglent AWG.
 
 ## Overview
 
