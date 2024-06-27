@@ -16,7 +16,7 @@ Current version of the program was tested under Linux and MacOS only. Later, I'l
 
 As of June 2024 the program supports the following models:
 
-* **Uni-Trend UTG1000x (like the UTG1022X)** This is a 2 channel 40MHz AWG. It connects to the PC as a USB serial port.
+* **Uni-Trend UTG1000x (like the UTG1022X)** This is a 2 channel 40MHz AWG. It connects to the PC via USB, but not as "dumb" serial. You must provide a Visa compatible connection string as ```port```. See below.
 
 * **Rigol DG800/DG900 series (like DG992)** When "liberated", this is a 2 channel 100MHz AWG with USB and (with the suitable adapter) ethernet interface. It is somewhat compatible with the SCPI 1992.0 standard. You must provide a Visa compatible connection string as ```port```. See below.
 
@@ -52,7 +52,7 @@ where
 
 * ```<awg_name>``` is the name of the AWG connected to your PC:  ```jds6600```, ```bk4075```, ```fy6600```, ```ad9910```, ```dg800```, ```utg1000x``` or ```dummy```. Note that ```dg800``` might also work for other SCPI 1992.0 standard compatible AWGs.
 
-* ```<port>``` is the port to which your AWG is connected. The type depends on you AWG, see the explanations above. For serial port AWGs, it will be something like ```/dev/ttyUSB0``` or ```/dev/ttyACM0```. If you use the ```dummy``` generator, you don't have to specify the port. If you use the ```dg800```, you must specify a Visa compatible connection string, like ```TCPIP::192.168.001.204::INSTR``` or ```USB0::9893::6453::DG1234567890A::0::INSTR```
+* ```<port>``` is the port to which your AWG is connected. The type depends on you AWG, see the explanations above. For serial port AWGs, it will be something like ```/dev/ttyUSB0``` or ```/dev/ttyACM0```. If you use the ```dummy``` generator, you don't have to specify the port. If you use the ```dg800``` or ```utg1000x```, you must specify a Visa compatible connection string, like ```TCPIP::192.168.001.204::INSTR``` or ```USB0::9893::6453::DG1234567890A::0::INSTR```
 
 * ```<baud_rate>``` The serial baud rate as defined in the AWG settings. Currently only ```bk4075``` supports it. If you don't provide this parameter, ```bk4075``` will use the default baud rate of 19200 bps. Two other AWGs don't require it: ```jds6600```, ```fy6600```, and ```ad9910``` run always at 115200 bps. The ```dummy``` generator doesn't use a serial port.
 
