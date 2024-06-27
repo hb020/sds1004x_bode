@@ -154,7 +154,11 @@ I'd like to add here more AWGs but it's impossible to have them all at the home 
 
 * **Nick Bryant (Dundarave on EEVblog Forum)** - Driver for Feeltech FY6600 AWG.
 
-* **Don F Becker** - Driver for AD9910 Arduino Shield
+* **Don F Becker** - Driver for AD9910 Arduino Shield.
+
+* **hb020** - Allow use with the newer SDS800x HD (12 bit) scopes, Driver for Rigol DG800/DG900 series. 
+
+* **alfredfo** - driver for Uni-Trend UTG1000x.
 
 ## Links
 
