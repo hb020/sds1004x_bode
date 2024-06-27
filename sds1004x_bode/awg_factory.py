@@ -12,6 +12,8 @@ from awgdrivers.bk4075 import BK4075
 from awgdrivers.fy6600 import FY6600
 from awgdrivers.ad9910 import AD9910
 from awgdrivers.dg800 import RigolDG800
+from awgdrivers.utg1000x import UTG1000x
+
 
 
 class AwgFactory(object):
@@ -24,13 +26,13 @@ class AwgFactory(object):
 
     def get_class_by_name(self, short_name):
         return self.awgs[short_name]
-    
+
     def get_names(self):
         out = []
         for a in self.awgs:
             out.append(a)
         return out
-        
+
 
 # Initialize factory
 awg_factory = AwgFactory()
@@ -40,3 +42,4 @@ awg_factory.add_awg(BK4075.SHORT_NAME, BK4075)
 awg_factory.add_awg(FY6600.SHORT_NAME, FY6600)
 awg_factory.add_awg(AD9910.SHORT_NAME, AD9910)
 awg_factory.add_awg(RigolDG800.SHORT_NAME, RigolDG800)
+awg_factory.add_awg(UTG1000x.SHORT_NAME, UTG1000x)
