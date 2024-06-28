@@ -40,11 +40,11 @@ Before starting the program you have to tell the oscilloscope how to connect to 
 
 To run this program you must have Python 3.11+ installed. Python 2.7 is not supported anymore.
 
-The source code is located in the [```sds1004x_bode```](https://github.com/4x1md/sds1004x_bode/tree/master/sds1004x_bode) directory of this repository.
+The source code is located in the [```sds1004x_bode```](/sds1004x_bode) directory of this repository.
 
-Python ```sockets``` requires elevated privileges in Linux, therefore the program has to be run with ```su``` or ```sudo``` command.
+Python ```sockets``` requires elevated privileges in Linux, therefore the program has to be run with ```su``` or ```sudo``` command. 
 
-The program must be run in Linux terminal. The file to be run is ```bode.py```. In order to run it, change current path to the directory where you downloaded the source code. Then write the following command:
+The program must be run in a command line terminal. The file to be run is ```bode.py```. In order to run it, change the current path to the directory where you downloaded the source code. Then write the following command:
 
 ```sudo python bode.py <awg_name> [<port>] [<baud_rate>] [-udp] [-h]```
 
