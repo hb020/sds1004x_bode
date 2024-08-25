@@ -95,7 +95,7 @@ class UTG1000x(BaseAWG):
         if channel is not None and channel not in CHANNELS:
             raise UnknownChannelError(CHANNELS_ERROR)
 
-        if channel == 0:
+        if channel is None or channel == 0:
             self.enable_output(1, on)
             self.enable_output(2, on)
         else:
@@ -105,10 +105,11 @@ class UTG1000x(BaseAWG):
     def set_frequency(self, channel: int, freq: float):
         if DEBUG_OUT:
             print(f"{MYNAME}: set_frequency(channel: {channel}, freq:{freq})")
+
         if channel is not None and channel not in CHANNELS:
             raise UnknownChannelError(CHANNELS_ERROR)
 
-        if channel == 0:
+        if channel is None or channel == 0:
             self.set_frequency(1, freq)
             self.set_frequency(2, freq)
         else:
@@ -121,7 +122,7 @@ class UTG1000x(BaseAWG):
         if channel is not None and channel not in CHANNELS:
             raise UnknownChannelError(CHANNELS_ERROR)
 
-        if channel == 0:
+        if channel is None or channel == 0:
             self.set_phase(1, phase)
             self.set_phase(2, phase)
         else:
@@ -148,7 +149,8 @@ class UTG1000x(BaseAWG):
 
         if channel is not None and channel not in CHANNELS:
             raise UnknownChannelError(CHANNELS_ERROR)
-        if channel == 0:
+
+        if channel is None or channel == 0:
             self.set_wave_type(1, wave_type)
             self.set_wave_type(2, wave_type)
         else:
@@ -163,7 +165,7 @@ class UTG1000x(BaseAWG):
         if channel is not None and channel not in CHANNELS:
             raise UnknownChannelError(CHANNELS_ERROR)
 
-        if channel == 0:
+        if channel is None or channel == 0:
             self.set_amplitude(1, amplitude)
             self.set_amplitude(2, amplitude)
         else:
@@ -177,7 +179,7 @@ class UTG1000x(BaseAWG):
         if channel is not None and channel not in CHANNELS:
             raise UnknownChannelError(CHANNELS_ERROR)
 
-        if channel == 0:
+        if channel is None or channel == 0:
             self.set_offset(1, offset)
             self.set_offset(2, offset)
         else:
@@ -192,7 +194,7 @@ class UTG1000x(BaseAWG):
         if channel is not None and channel not in CHANNELS:
             raise UnknownChannelError(CHANNELS_ERROR)
 
-        if channel == 0:
+        if channel is None or channel == 0:
             self.set_load_impedance(1, z)
             self.set_load_impedance(2, z)
         else:

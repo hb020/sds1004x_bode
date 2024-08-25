@@ -205,7 +205,7 @@ class FygenAWG(BaseAWG):
 
     def _retry(self, channel: int, command, value, match, match_fn=None):
         """Retries the command until match is satisfied."""
-        if channel == 0:
+        if channel is None or channel == 0:
             self._retry(1, command, value, match)
             self._retry(2, command, value, match)
             return
