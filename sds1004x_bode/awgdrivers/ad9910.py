@@ -9,7 +9,6 @@ Driver for AD9910 based AWG shield for arduino.
 import serial
 import time
 from .base_awg import BaseAWG
-from . import constants
 from .exceptions import UnknownChannelError
 
 # Port settings
@@ -36,6 +35,7 @@ DEFAULT_OUTPUT_ON = False
 # Output impedance of the AWG
 R_IN = 50.0
 
+
 class AD9910(BaseAWG):
     '''
     AD9910
@@ -44,12 +44,12 @@ class AD9910(BaseAWG):
     SHORT_NAME = "ad9910"
 
     def __init__(self, port, baud_rate=BAUD_RATE, timeout=TIMEOUT):
+        """baud_rate parameter is ignored."""
         self.port = port
-        self.baud_rate = BAUD_RATE
         self.timeout = timeout
 
     def connect(self):
-        self.ser = serial.Serial(self.port, self.baud_rate, BITS, PARITY, STOP_BITS, timeout=self.timeout)
+        self.ser = serial.Serial(self.port, BAUD_RATE, BITS, PARITY, STOP_BITS, timeout=self.timeout)
 
     def disconnect(self):
         self.ser.close()
@@ -66,10 +66,10 @@ class AD9910(BaseAWG):
         self.output_on = DEFAULT_OUTPUT_ON
         self.enable_output(1, self.output_on)
 
-    def get_id(self):
+    def get_id(self) -> str:
         return 'AD9910'
 
-    def enable_output(self, channel=None, on=False):
+    def enable_output(self, channel: int = None, on: bool = False):
         """
         Turns the output on or off.
         """
@@ -83,7 +83,7 @@ class AD9910(BaseAWG):
         else:
             self.send_command(b"D")
 
-    def set_frequency(self, channel, freq):
+    def set_frequency(self, channel: int, freq: float):
         """
         Sets output frequency.
         """
@@ -95,19 +95,19 @@ class AD9910(BaseAWG):
         print(cmd)
         self.send_command(cmd.encode('utf-8'))
 
-    def set_phase(self, channel, phase):
+    def set_phase(self, channel: int, phase: float):
         """
         AD9910 does not require setting phase.
         """
         pass
 
-    def set_wave_type(self, channel, wave_type):
+    def set_wave_type(self, channel: int, wave_type: int):
         """
         Sets the output wave type.
         """
         pass
 
-    def set_amplitude(self, channel, amplitude):
+    def set_amplitude(self, channel: int, amplitude: float):
         """
         Sets output amplitude.
         """
@@ -117,7 +117,7 @@ class AD9910(BaseAWG):
 
         pass
 
-    def set_offset(self, channel, offset):
+    def set_offset(self, channel: int, offset: float):
         """
         Sets DC offset of the output.
         """
@@ -126,7 +126,7 @@ class AD9910(BaseAWG):
 
         pass
 
-    def set_load_impedance(self, channel, z):
+    def set_load_impedance(self, channel: int, z: float):
         """
         Sets load impedance connected to each channel. Default value is 50 Ohms.
         """
@@ -135,5 +135,6 @@ class AD9910(BaseAWG):
 
         self.r_load = z
 
+
 if __name__ == '__main__':
-    print("This module shouldn't be run. Run awg_tests.py instead.")
+    print("This module shouldn't be run. Run awg_tests.py or bode.py instead.")

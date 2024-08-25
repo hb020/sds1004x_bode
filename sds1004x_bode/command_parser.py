@@ -6,6 +6,7 @@ Created on May 4, 2018
 
 from awgdrivers import constants
 
+
 class CommandParser(object):
     """
     Parses the commands sent by the oscilloscope and sends them to the AWG.
@@ -70,29 +71,29 @@ class CommandParser(object):
                 n += 2
 
             elif args[n] == "FRQ":
-                freq = float(args[n+1])
+                freq = float(args[n + 1])
                 self.awg.set_frequency(channel, freq)
                 n += 2
 
             elif args[n] == "AMP":
-                ampl = float(args[n+1])
+                ampl = float(args[n + 1])
                 self.awg.set_amplitude(channel, ampl)
                 n += 2
 
             elif args[n] == "OFST":
-                offset = float(args[n+1])
+                offset = float(args[n + 1])
                 self.awg.set_offset(channel, offset)
                 n += 2
 
             elif args[n] == "PHSE":
-                phase = float(args[n+1])
+                phase = float(args[n + 1])
                 self.awg.set_phase(channel, phase)
                 n += 2
 
             else:
                 n += 1
 
-    def parse_outp(self, args, channel):
+    def parse_outp(self, args, channel: int):
         """
         Parses and executes the OUTP command which is used to turn the AWG output on and
         to set the load impedance of the AWG to 50 Ohm, 75 Ohm or Hi-Z.
@@ -114,10 +115,10 @@ class CommandParser(object):
                 n += 1
 
             elif args[n] == "LOAD":
-                if args[n+1] == "HZ":
+                if args[n + 1] == "HZ":
                     z = constants.HI_Z
                 else:
-                    z = int(args[n+1])
+                    z = int(args[n + 1])
                 self.awg.set_load_impedance(channel, z)
                 n += 2
 

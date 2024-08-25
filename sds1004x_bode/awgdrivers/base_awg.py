@@ -4,6 +4,7 @@ Created on Apr 24, 2018
 @author: 4x1md
 '''
 
+
 class BaseAWG(object):
     '''
     Base class defining arbitrary waveform generator and its functionality.
@@ -22,27 +23,27 @@ class BaseAWG(object):
     def initialize(self):
         raise NotImplementedError()
 
-    def get_id(self):
+    def get_id(self) -> str:
         raise NotImplementedError()
 
-    def enable_output(self, channel, on):
+    def enable_output(self, channel: int, on: bool):
         raise NotImplementedError()
 
-    def set_frequency(self, channel, freq):
+    def set_frequency(self, channel: int, freq: float):
         raise NotImplementedError()
 
-    def set_phase(self, channel, phase):
+    def set_phase(self, channel: int, phase: float):
         raise NotImplementedError()
 
-    def set_wave_type(self, channel, wave_type):
+    def set_wave_type(self, channel: int, wave_type: int):
         raise NotImplementedError()
 
-    def set_amplitude(self, channel, amplitude):
+    def set_amplitude(self, channel: int, amplitude: float):
         raise NotImplementedError()
 
-    def set_offset(self, channel, offset):
+    def set_offset(self, channel: int, offset: float):
         raise NotImplementedError()
 
-    def set_load_impedance(self, channel, z):
+    def set_load_impedance(self, channel: int, z: float):
+        # in the hints, float means that int is also accepted
         raise NotImplementedError()
-

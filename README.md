@@ -14,27 +14,27 @@ Current version of the program was tested under Linux and MacOS only. Later, I'l
 
 ## Supported AWG Models
 
-As of June 2024 the program supports the following models:
+As of August 2024 the program supports the following models:
 
-* **Uni-Trend UTG1000x (like the UTG1022X)** This is a 2 channel 40MHz AWG. It connects to the PC via USB, but not as "dumb" serial. You must provide a Visa compatible connection string as ```port```. See below.
+* **Uni-Trend UTG1000x (like the UTG1022X)** This is a 2 channel 40MHz AWG. It connects to the PC via USB, and talks a dialect of the SCPI 1992.0 standard. There may be other devices that use this same dialect, so you may be able to use this driver for other AWGs. ```port``` must be a Visa compatible connection string. See below.
 
-* **Rigol DG800/DG900 series (like DG992)** When "liberated", this is a 2 channel 100MHz AWG with USB and (with the suitable adapter) ethernet interface. It is somewhat compatible with the SCPI 1992.0 standard. You must provide a Visa compatible connection string as ```port```. See below.
+* **Rigol DG800/DG900 series (like the DG811..DG992)**. When "liberated", that is a 2 channel 100MHz AWG with USB and (with the suitable adapter) ethernet interface, and talks a dialect of the SCPI 1992.0 standard. There may be other devices that use this same dialect, so you may be able to use this driver for other AWGs. ```port``` must be a Visa compatible connection string, be it USB or ethernet. See below.
 
-* **BK Precision BK4075** One channel 25MHz AWG. Requires a RS-232 serial port for the connection to a PC. It is compatible with the SCPI 1992.0 standard.
+* **BK Precision BK4075** One channel 25MHz AWG. ```port``` must be a serial port. You must also provide ```<baud_rate>``` if you use another speed than 19200. See below. You might also be able to get this AWG working via the visa driver.
 
-* **RD JDS6600** Chinese generator which is widely sold on eBay and AliExpress. It connects to the PC as a USB serial port.
+* **RD JDS6600** Chinese generator which is widely sold on eBay and AliExpress. ```port``` must be a serial port. See below.
 
-* **Feeltech FY6600** Another Chinese generator which is widely sold on eBay and AliExpress. It also connects to the PC as a USB serial port.
+* **Feeltech FY6600** Another Chinese generator which is widely sold on eBay and AliExpress. ```port``` must be a serial port. See below.
 
-* **AD9910 Arduino Shield** https://gra-afch.com/catalog/rf-units/dds-ad9910-arduino-shield/. It also connects to the PC as a USB serial port.
+* **Feeltech FYxxxx** A range of Chinese generators. This driver has some improvements over the FY6600 driver, and supports FY2300, FY6600, FY6800, FY6900 and probably more. ```port``` must be a serial port. See below.
 
-## Program Structure
-
-TBD
+* **AD9910 Arduino Shield** [DDS AD9910 Shield](https://gra-afch.com/catalog/rf-units/dds-ad9910-arduino-shield/). ```port``` must be a serial port. See below.
 
 ## Oscilloscope Configuration
 
-Before starting the program you have to tell the oscilloscope how to connect to the waveform generator. Connect your oscilloscope to the same network where your PC is connected. Then go to ```Configure => AWG I/O``` in the Bode plot settings. Define LAN connection and the IP addres of your PC as the AWG IP. After starting the program you can press ```Test Connection``` button to test the communication between the oscilloscope and the PC.
+Before starting the program you have to tell the oscilloscope how to connect to the waveform generator. Connect your oscilloscope to the same network where your PC is connected. Then go to ```Configure => AWG I/O``` in the Bode plot settings. Define LAN connection and the IP addres of your PC as the AWG IP. Please keep ```Amplitude Unit``` to ```Vpp```. This program does not (yet) support other units.
+
+When you start the program, it will automatically test the communication between the PC and the AWG, and start the AWG server on the PC. Once the program is up and running, you can press the ```Test Connection``` button on the oscilloscope to test the communication between the oscilloscope and the PC.
 
 ## Running The Program
 
@@ -42,7 +42,7 @@ To run this program you must have Python 3.11+ installed. Python 2.7 is not supp
 
 The source code is located in the [```sds1004x_bode```](/sds1004x_bode) directory of this repository.
 
-Python ```sockets``` requires elevated privileges in Linux, therefore the program has to be run with ```su``` or ```sudo``` command. 
+Python ```sockets``` requires elevated privileges in Linux, therefore the program has to be run with ```su``` or ```sudo``` command. On MacOS you likely will not need ```sudo```.
 
 The program must be run in a command line terminal. The file to be run is ```bode.py```. In order to run it, change the current path to the directory where you downloaded the source code. Then write the following command:
 
@@ -50,11 +50,11 @@ The program must be run in a command line terminal. The file to be run is ```bod
 
 where
 
-* ```<awg_name>``` is the name of the AWG connected to your PC:  ```jds6600```, ```bk4075```, ```fy6600```, ```ad9910```, ```dg800```, ```utg1000x``` or ```dummy```. Note that ```dg800``` might also work for other SCPI 1992.0 standard compatible AWGs.
+* ```<awg_name>``` is the name of the AWG connected to your PC:  ```jds6600```, ```bk4075```, ```fy6600```, ```fy```, ```ad9910```, ```dg800```, ```utg1000x``` or ```dummy```.
 
-* ```<port>``` is the port to which your AWG is connected. The type depends on you AWG, see the explanations above. For serial port AWGs, it will be something like ```/dev/ttyUSB0``` or ```/dev/ttyACM0```. If you use the ```dummy``` generator, you don't have to specify the port. If you use the ```dg800``` or ```utg1000x```, you must specify a Visa compatible connection string, like ```TCPIP::192.168.001.204::INSTR``` or ```USB0::9893::6453::DG1234567890A::0::INSTR```
+* ```<port>``` is the port to which your AWG is connected. The type depends on you AWG, see the explanations above. For serial port AWGs, it will be something like ```/dev/ttyUSB0``` or ```/dev/ttyACM0```. If you use the ```dummy``` generator, you don't have to specify the port. If you use one of the SCPI compatible devices like the ```dg800``` or ```utg1000x```, you must specify a Visa compatible connection string, like ```TCPIP::192.168.001.204::INSTR``` or ```USB0::9893::6453::DG1234567890A::0::INSTR```
 
-* ```<baud_rate>``` The serial baud rate as defined in the AWG settings. Currently only ```bk4075``` supports it. If you don't provide this parameter, ```bk4075``` will use the default baud rate of 19200 bps. Two other AWGs don't require it: ```jds6600```, ```fy6600```, and ```ad9910``` run always at 115200 bps. The ```dummy``` generator doesn't use a serial port.
+* ```<baud_rate>``` The serial baud rate as defined in the AWG settings. ```bk4075``` uses a default speed of 19200. All others run on 115200, and this parameter will be ignored for them.
 
 The ```dummy``` generator was added for running this program without connecting a signal generator. The program will emulate a Siglent AWG and the oscilloscope will generate a Bode plot but no commands will be sent to the AWG.
 
@@ -64,7 +64,7 @@ Use ```-h``` for help text.
 
 If the program starts successfully, you'll see the following output:
 
-```
+```text
 Initializing AWG...
 AWG: jds6600
 Port: /dev/ttyUSB0
@@ -79,7 +79,7 @@ Waiting for connection request...
 
 After starting the program, follow the usual procedure of creating Bode plot. After starting the plotting, the program output will be similar to the following:
 
-```
+```text
 Incoming connection from 192.168.14.27:55916.
 VXI-11 CREATE_LINK, SCPI command: inst0
 VXI-11 DEVICE_WRITE, SCPI command: IDN-SGLT-PRI?
@@ -117,7 +117,17 @@ VXI-11 DESTROY_LINK, SCPI command: None
 VXI-11 moving to TCP port 9010
 ```
 
+## SCPI compatible AWGs
+
+Many different SCPI dialects exist. If you have an AWG that is not listed but is SCPI compatible, you may try one of the existing SCPI drivers (```dg800``` or ```utg1000x```). If you want to do a quick test, adapt `awg_tests.py` to your device and address, it will test all commands. If your device does not talk one of the existing dialects, you can create a new one easily by using one of the existing drivers as example. Please tell us if you have done so (via github Issue or Pull request), so that we can add the device to the list.
+
 ## Changelog
+
+### 2024-08-25
+
+* lint cleanup.
+* added generic fy gen support (FY2300, FY6600, FY6800, FY6900 and probably more) from the [3tch-a-sketch and mattwach forks](https://github.com/3tch-a-sketch/sds1004x_bode)
+* readme clarifications.
 
 ### 2024-06-27
 
@@ -156,9 +166,13 @@ I'd like to add here more AWGs but it's impossible to have them all at the home 
 
 * **Don F Becker** - Driver for AD9910 Arduino Shield.
 
-* **hb020** - Allow use with the newer SDS800x HD (12 bit) scopes, Driver for Rigol DG800/DG900 series. 
+* **hb020** - Allow use with the newer SDS800x HD (12 bit) scopes, Driver for Rigol DG800/DG900 series.
 
 * **alfredfo** - driver for Uni-Trend UTG1000x.
+
+* **3tch-a-sketch** - generic Feeltech FY driver.
+
+* **hb020** - Driver for Rigol DG800/DG900 series, and adaptation for SDS800X-HD series
 
 ## Links
 

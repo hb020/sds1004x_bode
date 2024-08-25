@@ -31,7 +31,7 @@ WAVEFORM_COMMANDS = {
     constants.SQUARE: ":SOUR:FUNC SQU",
     constants.PULSE: ":SOUR:FUNC PUL",
     constants.TRIANGLE: ":SOUR:FUNC TRI"
-    }
+}
 # Delay between commands. BK4075 doesn't seem to need it.
 SLEEP_TIME = 0.005
 
@@ -42,6 +42,7 @@ DEFAULT_OUTPUT_ON = False
 # Output impedance of the AWG
 R_IN = 50.0
 
+
 class BK4075(BaseAWG):
     '''
     BK Precision 4075 generator driver.
@@ -50,7 +51,7 @@ class BK4075(BaseAWG):
     SHORT_NAME = "bk4075"
 
     def __init__(self, port, baud_rate=DEFAULT_BAUD_RATE, timeout=TIMEOUT):
-        if not baud_rate in BAUD_RATES:
+        if baud_rate not in BAUD_RATES:
             raise ValueError("Baud rate must be 2400, 4800, 9600 or 19200 bps.")
         self.port = port
         self.baud_rate = baud_rate
@@ -75,14 +76,14 @@ class BK4075(BaseAWG):
         self.output_on = DEFAULT_OUTPUT_ON
         self.enable_output(1, self.output_on)
 
-    def get_id(self):
+    def get_id(self) -> str:
         self.ser.reset_input_buffer()
         self.send_command("*IDN?")
         time.sleep(SLEEP_TIME)
         ans = self.ser.read_until(terminator=EOL, size=None)
         return ans.strip()
 
-    def enable_output(self, channel=None, on=False):
+    def enable_output(self, channel: int = None, on: bool = False):
         """
         Turns the output on or off.
 
@@ -101,7 +102,7 @@ class BK4075(BaseAWG):
         else:
             self.send_command(":OUTP:STAT OFF")
 
-    def set_frequency(self, channel, freq):
+    def set_frequency(self, channel: int, freq: float):
         """
         Sets output frequency.
 
@@ -120,13 +121,13 @@ class BK4075(BaseAWG):
         cmd = ":FREQ %s" % (freq_str)
         self.send_command(cmd)
 
-    def set_phase(self, phase):
+    def set_phase(self, channel: int, phase: float):
         """
         BK4075 does not require setting phase.
         """
         pass
 
-    def set_wave_type(self, channel, wave_type):
+    def set_wave_type(self, channel: int, wave_type: int):
         """
         Sets the output wave type.
 
@@ -141,13 +142,13 @@ class BK4075(BaseAWG):
         """
         if channel is not None and channel not in CHANNELS:
             raise UnknownChannelError(CHANNELS_ERROR)
-        if not wave_type in constants.WAVE_TYPES:
+        if wave_type not in constants.WAVE_TYPES:
             raise ValueError("Incorrect wave type.")
 
         cmd = WAVEFORM_COMMANDS[wave_type]
         self.send_command(cmd)
 
-    def set_amplitude(self, channel, amplitude):
+    def set_amplitude(self, channel: int, amplitude: float):
         """
         Sets output amplitude.
 
@@ -169,7 +170,7 @@ class BK4075(BaseAWG):
         cmd = ":VOLT:AMPL %s" % (amp_str)
         self.send_command(cmd)
 
-    def set_offset(self, channel, offset):
+    def set_offset(self, channel: int, offset: float):
         """
         Sets DC offset of the output.
 
@@ -190,7 +191,7 @@ class BK4075(BaseAWG):
         cmd = ":VOLT:OFFS %s" % (offset)
         self.send_command(cmd)
 
-    def set_load_impedance(self, channel, z):
+    def set_load_impedance(self, channel: int, z: float):
         """
         Sets load impedance connected to each channel. Default value is 50 Ohms.
         """
@@ -219,5 +220,6 @@ class BK4075(BaseAWG):
         else:
             self.v_out_coeff = 0.5 * (self.r_load + R_IN) / self.r_load
 
+
 if __name__ == '__main__':
-    print("This module shouldn't be run. Run awg_tests.py instead.")
+    print("This module shouldn't be run. Run awg_tests.py or bode.py instead.")

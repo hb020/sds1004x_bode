@@ -6,3 +6,4 @@ __pycache__/
 # PyDev project files
 .project
 .pydevproject
+.DS_Store

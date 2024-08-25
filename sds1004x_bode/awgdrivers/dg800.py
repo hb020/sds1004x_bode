@@ -14,13 +14,14 @@ TIMEOUT = 5
 DEBUG_OUT = False
 
 CHANNELS = (0, 1, 2)
-CHANNELS_ERROR = "DG800 has only 2 channels."
+MYNAME = "DG800"
+CHANNELS_ERROR = f"{MYNAME} has only 2 channels."
 WAVEFORM_COMMANDS = {
     constants.SINE: ":SOURCE{channel}:FUNC SIN",
     constants.SQUARE: ":SOURCE{channel}:FUNC SQU",
     constants.PULSE: ":SOURCE{channel}:FUNC PULSE",
     constants.TRIANGLE: ":SOURCE{channel}:FUNC TRIANG"
-    }
+}
 
 # Default AWG settings
 DEFAULT_LOAD = 50
@@ -32,11 +33,11 @@ class RigolDG800(BaseAWG):
     DG800 waveform generator driver.
     '''
 
-    SHORT_NAME = "dg800"
+    SHORT_NAME = MYNAME.lower()
 
     def __init__(self, port, ignore=None, timeout=TIMEOUT):
         if DEBUG_OUT:
-            print("DG800: init")
+            print(f"{MYNAME}: init")
         self.port = port
         self.rm = None
         self.m = None
@@ -45,7 +46,10 @@ class RigolDG800(BaseAWG):
         self.r_load = [DEFAULT_LOAD, DEFAULT_LOAD]
         self.v_out_coeff = [1, 1]
 
-    def send_command(self, cmd):
+    def _send_command(self, cmd):
+        # local function to send a command and check for errors
+        if DEBUG_OUT:
+            print(f"{MYNAME}: send command \"{cmd}\"")
         self.m.write(cmd)
         r = self.m.query(":SYSTem:ERRor?")
         if r.startswith("0,"):
@@ -57,14 +61,14 @@ class RigolDG800(BaseAWG):
 
     def connect(self):
         if DEBUG_OUT:
-            print("DG800: connect")
+            print(f"{MYNAME}: connect")
         self.rm = visa.ResourceManager()
         self.m = self.rm.open_resource(self.port)
         self.m.timeout = self.timeout * 1000
 
     def disconnect(self):
         if DEBUG_OUT:
-            print("DG800: disconnect")
+            print(f"{MYNAME}: disconnect")
         if self.m is not None:
             self.enable_output(0, False)
             self.m.close()
@@ -75,19 +79,19 @@ class RigolDG800(BaseAWG):
 
     def initialize(self):
         if DEBUG_OUT:
-            print("DG800: initialize")
+            print(f"{MYNAME}: initialize")
         self.connect()
         self.m.write("*CLS")
         # self.m.write("*RST")
 
-    def get_id(self):
+    def get_id(self) -> str:
         ans = self.m.query("*IDN?")
         return ans.strip()
 
-    def enable_output(self, channel, on):
+    def enable_output(self, channel: int, on: bool):
         if DEBUG_OUT:
-            print(f"DG800: enable_output(channel: {channel}, on:{on})")
-            
+            print(f"{MYNAME}: enable_output(channel: {channel}, on:{on})")
+
         if channel is not None and channel not in CHANNELS:
             raise UnknownChannelError(CHANNELS_ERROR)
 
@@ -95,13 +99,12 @@ class RigolDG800(BaseAWG):
             self.enable_output(1, on)
             self.enable_output(2, on)
         else:
-            self.channel_on[channel - 1] = on        
-            self.send_command(f":OUTPUT{channel}:STATE {"ON" if on else "OFF"}")
+            self.channel_on[channel - 1] = on
+            self._send_command(f":OUTPUT{channel}:STATE {"ON" if on else "OFF"}")
 
-    def set_frequency(self, channel, freq):
+    def set_frequency(self, channel: int, freq: float):
         if DEBUG_OUT:
-            print(f"DG800: set_frequency(channel: {channel}, freq:{freq})")
-            
+            print(f"{MYNAME}: set_frequency(channel: {channel}, freq:{freq})")
         if channel is not None and channel not in CHANNELS:
             raise UnknownChannelError(CHANNELS_ERROR)
 
@@ -109,18 +112,18 @@ class RigolDG800(BaseAWG):
             self.set_frequency(1, freq)
             self.set_frequency(2, freq)
         else:
-            self.send_command(f":SOURCE{channel}:FREQ {freq:.10f}")        
-        
-    def set_phase(self, channel, phase):
+            self._send_command(f":SOURCE{channel}:FREQ {freq:.10f}")        
+
+    def set_phase(self, channel: int, phase: float):
         if DEBUG_OUT:
-            print(f"DG800: set_phase(phase: {phase})")
+            print(f"{MYNAME}: set_phase(phase: {phase})")
         # phase settings do not really work on this device, but I try anyway
         if channel is not None and channel not in CHANNELS:
             raise UnknownChannelError(CHANNELS_ERROR)
 
         if channel == 0:
-            self.set_frequency(1, phase)
-            self.set_frequency(2, phase)
+            self.set_phase(1, phase)
+            self.set_phase(2, phase)
         else:
             try:
                 phase = int(phase)
@@ -134,68 +137,72 @@ class RigolDG800(BaseAWG):
                 phase = 0
             if phase > 360:
                 phase = 0
-            self.send_command(f":SOURCE{channel}:PHASE {phase}")            
+            self._send_command(f":SOURCE{channel}:PHASE {phase}")
 
-    def set_wave_type(self, channel, wave_type):
+    def set_wave_type(self, channel: int, wave_type: int):
         if DEBUG_OUT:
-            print(f"DG800: set_wave_type(channel: {channel}, wavetype:{wave_type})")
-        
+            print(f"{MYNAME}: set_wave_type(channel: {channel}, wavetype:{wave_type})")
+
         if wave_type not in constants.WAVE_TYPES:
             raise ValueError("Incorrect wave type.")
-        
+
         if channel is not None and channel not in CHANNELS:
-            raise UnknownChannelError(CHANNELS_ERROR)        
+            raise UnknownChannelError(CHANNELS_ERROR)
         if channel == 0:
             self.set_wave_type(1, wave_type)
             self.set_wave_type(2, wave_type)
-        else:        
+        else:
             cmd = WAVEFORM_COMMANDS[wave_type]
             cmd = cmd.replace("{channel}", str(channel))
-            self.send_command(cmd)            
+            self._send_command(cmd)
 
-    def set_amplitude(self, channel, amp):
+    def set_amplitude(self, channel: int, amplitude: float):
         if DEBUG_OUT:
-            print(f"DG800: set_amplitude(channel: {channel}, amplitude:{amp})")
-            
+            print(f"{MYNAME}: set_amplitude(channel: {channel}, amplitude:{amplitude})")
+
         if channel is not None and channel not in CHANNELS:
             raise UnknownChannelError(CHANNELS_ERROR)
 
         if channel == 0:
-            self.set_amplitude(1, amp)
-            self.set_amplitude(2, amp)
-        else:     
+            self.set_amplitude(1, amplitude)
+            self.set_amplitude(2, amplitude)
+        else:
             # Adjust the amplitude to the defined load impedance
-            amp = amp / self.v_out_coeff[channel - 1]
-            self.send_command(f":SOURCE{channel}:VOLT:AMPL {amp:.3f}")            
+            amplitude = amplitude / self.v_out_coeff[channel - 1]
+            self._send_command(f":SOURCE{channel}:VOLT:AMPL {amplitude:.3f}")
 
-    def set_offset(self, channel, offset):
+    def set_offset(self, channel: int, offset: float):
         if DEBUG_OUT:
-            print(f"DG800: set_offset(channel: {channel}, offset:{offset})")
+            print(f"{MYNAME}: set_offset(channel: {channel}, offset:{offset})")
         if channel is not None and channel not in CHANNELS:
             raise UnknownChannelError(CHANNELS_ERROR)
 
         if channel == 0:
             self.set_offset(1, offset)
             self.set_offset(2, offset)
-        else:               
+        else:
             # Adjust the offset to the defined load impedance
-            offset = offset / self.v_out_coeff[channel - 1] 
-            self.send_command(f":SOURCE{channel}:VOLT:OFFS {offset}")               
+            offset = offset / self.v_out_coeff[channel - 1]
+            self._send_command(f":SOURCE{channel}:VOLT:OFFS {offset}")
 
-    def set_load_impedance(self, channel, z):
+    def set_load_impedance(self, channel: int, z: float):
         if DEBUG_OUT:
-            print(f"DG800: set_load_impedance(channel: {channel}, impedance:{z})")
+            print(f"{MYNAME}: set_load_impedance(channel: {channel}, impedance:{z})")
+
         if channel is not None and channel not in CHANNELS:
             raise UnknownChannelError(CHANNELS_ERROR)
 
         if channel == 0:
             self.set_load_impedance(1, z)
             self.set_load_impedance(2, z)
-        else:                
+        else:
             if z == constants.HI_Z:
                 v_out_coeff = 1
             else:
                 v_out_coeff = z / (z + (DEFAULT_LOAD * 1.0))
-            self.v_out_coeff[channel - 1] = v_out_coeff      
-            self.send_command(f":OUTPUT{channel}:IMP {z}")      
+            self.v_out_coeff[channel - 1] = v_out_coeff
+            self._send_command(f":OUTPUT{channel}:IMP {z}")
 
+
+if __name__ == '__main__':
+    print("This module shouldn't be run. Run awg_tests.py or bode.py instead.")

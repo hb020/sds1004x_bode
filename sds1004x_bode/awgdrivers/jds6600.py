@@ -30,6 +30,7 @@ SLEEP_TIME = 0.015
 # Output impedance of the AWG
 R_IN = 50.0
 
+
 class JDS6600(BaseAWG):
     '''
     JDS6600 function generator driver.
@@ -59,16 +60,16 @@ class JDS6600(BaseAWG):
     def initialize(self):
         self.channel_on = [False, False]
         self.connect()
-        self.enable_output()
+        self.enable_output(None, False)
 
-    def get_id(self):
+    def get_id(self) -> str:
         self.send_command(":r01=0.")
         ans = self.ser.read_until(terminator=".\r\n", size=None)
         ans = ans.replace(":ok", "")
         ans = ans.strip()
         return ans.strip()
 
-    def enable_output(self, channel=None, on=False):
+    def enable_output(self, channel: int = None, on: bool = False):
         """
         Turns channels output on or off.
         The channel is defined by channel variable. If channel is None, both channels are set.
@@ -84,16 +85,16 @@ class JDS6600(BaseAWG):
             raise UnknownChannelError(CHANNELS_ERROR)
 
         if channel is not None and channel != 0:
-            self.channel_on[channel-1] = on
+            self.channel_on[channel - 1] = on
         else:
             self.channel_on = [on, on]
 
-        ch1 = "1" if self.channel_on[0] == True else "0"
-        ch2 = "1" if self.channel_on[1] == True else "0"
+        ch1 = "1" if self.channel_on[0] else "0"
+        ch2 = "1" if self.channel_on[1] else "0"
         cmd = ":w20=%s,%s." % (ch1, ch2)
         self.send_command(cmd)
 
-    def set_frequency(self, channel, freq):
+    def set_frequency(self, channel: int, freq: float):
         """
         Sets frequency on the selected channel.
 
@@ -121,7 +122,7 @@ class JDS6600(BaseAWG):
             cmd = ":w24=%s,0." % freq_str
             self.send_command(cmd)
 
-    def set_phase(self, channel, phase):
+    def set_phase(self, channel: int, phase: float):
         """
         Sends the phase setting command to the generator.
         The phase is set on channel 2 only.
@@ -138,7 +139,7 @@ class JDS6600(BaseAWG):
         cmd = ":w31=%s." % (phase)
         self.send_command(cmd)
 
-    def set_wave_type(self, channel, wave_type):
+    def set_wave_type(self, channel: int, wave_type: int):
         """
         Sets wave type of the selected channel.
 
@@ -149,7 +150,7 @@ class JDS6600(BaseAWG):
         """
         if channel is not None and channel not in CHANNELS:
             raise UnknownChannelError(CHANNELS_ERROR)
-        if not wave_type in constants.WAVE_TYPES:
+        if wave_type not in constants.WAVE_TYPES:
             raise ValueError("Incorrect wave type.")
 
         # Channel 1
@@ -162,7 +163,7 @@ class JDS6600(BaseAWG):
             cmd = ":w22=%s." % wave_type
             self.send_command(cmd)
 
-    def set_amplitude(self, channel, amplitude):
+    def set_amplitude(self, channel: int, amplitude: float):
         """
         Sets amplitude of the selected channel.
 
@@ -178,7 +179,7 @@ class JDS6600(BaseAWG):
         Adjust the output amplitude to obtain the requested amplitude
         on the defined load impedance.
         """
-        amplitude = amplitude / self.v_out_coeff[channel-1]
+        amplitude = amplitude / self.v_out_coeff[channel - 1]
 
         amp_str = "%.3f" % amplitude
         amp_str = amp_str.replace(".", "")
@@ -193,7 +194,7 @@ class JDS6600(BaseAWG):
             cmd = ":w26=%s." % amp_str
             self.send_command(cmd)
 
-    def set_offset(self, channel, offset):
+    def set_offset(self, channel: int, offset: float):
         """
         Sets DC offset of the selected channel.
 
@@ -209,7 +210,7 @@ class JDS6600(BaseAWG):
             raise UnknownChannelError(CHANNELS_ERROR)
 
         # Adjust the offset to the defined load impedance
-        offset = offset / self.v_out_coeff[channel-1]
+        offset = offset / self.v_out_coeff[channel - 1]
 
         offset_val = 1000 + int(offset * 100)
 
@@ -223,14 +224,14 @@ class JDS6600(BaseAWG):
             cmd = ":w28=%s." % offset_val
             self.send_command(cmd)
 
-    def set_load_impedance(self, channel, z):
+    def set_load_impedance(self, channel: int, z: float):
         """
         Sets load impedance connected to each channel. Default value is 50 Ohm.
         """
         if channel is not None and channel not in CHANNELS:
             raise UnknownChannelError(CHANNELS_ERROR)
 
-        self.r_load[channel-1] = z
+        self.r_load[channel - 1] = z
 
         """
         Vout coefficient defines how the requestd amplitude must be increased
@@ -244,7 +245,8 @@ class JDS6600(BaseAWG):
             v_out_coeff = 1
         else:
             v_out_coeff = z / (z + R_IN)
-        self.v_out_coeff[channel-1] = v_out_coeff
+        self.v_out_coeff[channel - 1] = v_out_coeff
+
 
 if __name__ == '__main__':
-    print("This module shouldn't be run. Run awg_tests.py instead.")
+    print("This module shouldn't be run. Run awg_tests.py or bode.py instead.")

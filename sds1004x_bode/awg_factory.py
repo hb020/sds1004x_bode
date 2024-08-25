@@ -10,10 +10,10 @@ from awgdrivers.dummy_awg import DummyAWG
 from awgdrivers.jds6600 import JDS6600
 from awgdrivers.bk4075 import BK4075
 from awgdrivers.fy6600 import FY6600
+from awgdrivers.fy import FygenAWG
 from awgdrivers.ad9910 import AD9910
 from awgdrivers.dg800 import RigolDG800
 from awgdrivers.utg1000x import UTG1000x
-
 
 
 class AwgFactory(object):
@@ -36,10 +36,15 @@ class AwgFactory(object):
 
 # Initialize factory
 awg_factory = AwgFactory()
-awg_factory.add_awg(DummyAWG.SHORT_NAME, DummyAWG)
-awg_factory.add_awg(JDS6600.SHORT_NAME, JDS6600)
-awg_factory.add_awg(BK4075.SHORT_NAME, BK4075)
-awg_factory.add_awg(FY6600.SHORT_NAME, FY6600)
-awg_factory.add_awg(AD9910.SHORT_NAME, AD9910)
-awg_factory.add_awg(RigolDG800.SHORT_NAME, RigolDG800)
-awg_factory.add_awg(UTG1000x.SHORT_NAME, UTG1000x)
+drivers = (
+    DummyAWG,
+    JDS6600,
+    BK4075,
+    FY6600,
+    FygenAWG,
+    AD9910,
+    RigolDG800,
+    UTG1000x
+)
+for driver in drivers:
+    awg_factory.add_awg(driver.SHORT_NAME, driver)

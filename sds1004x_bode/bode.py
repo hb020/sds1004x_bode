@@ -35,6 +35,8 @@ if __name__ == '__main__':
     awg_class = awg_factory.get_class_by_name(awg_name)
     awg = awg_class(awg_port, awg_baud_rate)
     awg.initialize()
+    print("IDN: %s" % awg.get_id())
+    print("AWG initialized.")
 
     # Run AWG server
     server = None
@@ -50,4 +52,3 @@ if __name__ == '__main__':
             server.close_sockets()
 
     print("Bye.")
-
