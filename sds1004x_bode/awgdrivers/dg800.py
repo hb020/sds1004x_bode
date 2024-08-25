@@ -117,7 +117,7 @@ class RigolDG800(BaseAWG):
 
     def set_phase(self, channel: int, phase: float):
         if DEBUG_OUT:
-            print(f"{MYNAME}: set_phase(phase: {phase})")
+            print(f"{MYNAME}: set_phase(channel: {channel}, phase: {phase})")
         # phase settings do not really work on this device, but I try anyway
         if channel is not None and channel not in CHANNELS:
             raise UnknownChannelError(CHANNELS_ERROR)
