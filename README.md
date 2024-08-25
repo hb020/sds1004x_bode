@@ -20,7 +20,7 @@ As of August 2024 the program supports the following models:
 
 * **Rigol DG800/DG900 series (like the DG811..DG992)**. When "liberated", that is a 2 channel 100MHz AWG with USB and (with the suitable adapter) ethernet interface, and talks a dialect of the SCPI 1992.0 standard. There may be other devices that use this same dialect, so you may be able to use this driver for other AWGs. ```port``` must be a Visa compatible connection string, be it USB or ethernet. See below.
 
-* **BK Precision BK4075** One channel 25MHz AWG. ```port``` must be a serial port. You must also provide ```<baud_rate>``` if you use another speed than 19200. See below. You might also be able to get this AWG working via the visa driver.
+* **BK Precision BK4075** One channel 25MHz AWG. ```port``` must be a serial port. You must also provide ```baud_rate``` if you use another speed than 19200. See below. You might also be able to get this AWG working via the visa driver.
 
 * **RD JDS6600** Chinese generator which is widely sold on eBay and AliExpress. ```port``` must be a serial port. See below.
 
