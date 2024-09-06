@@ -134,6 +134,11 @@ Many different SCPI dialects exist. If you have an AWG that is not listed but is
 
 ## Changelog
 
+### 2024-09-06
+
+* compatibility with older Python versions (tested down to 3.8).
+* better exception handling on port opening.
+
 ### 2024-08-25
 
 * lint cleanup.
