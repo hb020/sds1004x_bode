@@ -100,7 +100,7 @@ class UTG1000x(BaseAWG):
             self.enable_output(2, on)
         else:
             self.channel_on[channel - 1] = on
-            self._send_command(f":CHAN{channel}:OUTPUT {"ON" if on else "OFF"}")
+            self._send_command(f":CHAN{channel}:OUTPUT {'ON' if on else 'OFF'}")
 
     def set_frequency(self, channel: int, freq: float):
         if DEBUG_OUT:

@@ -34,7 +34,7 @@ LXI_PROCEDURES = {
     11: "DEVICE_WRITE",
     12: "DEVICE_READ",
     23: "DESTROY_LINK"
-    }
+}
 
 # VXI-11 Core (395183)
 VXI11_CORE_ID = 395183
@@ -84,14 +84,22 @@ class AwgServer(object):
 
     def create_socket(self, host, port, on_udp):
         if on_udp:
-            sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-            sock.bind((host, port))
+            try:
+                sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+                sock.bind((host, port))
+            except OSError as ex:
+                print(f"Fatal error: {ex}. Cannot open UDP port {port} on address {host} for listening.")
+                exit(1)
         else:
-            sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-            # Disable the TIME_WAIT state of connected sockets, and allow reuse, as I switch ports rather quickly
-            sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-            sock.bind((host, port))
-            sock.listen(1)  # Become a server socket, maximum 1 connection
+            try:
+                sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+                # Disable the TIME_WAIT state of connected sockets, and allow reuse, as I switch ports rather quickly
+                sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+                sock.bind((host, port))
+                sock.listen(1)  # Become a server socket, maximum 1 connection
+            except OSError as ex:
+                print(f"Fatal error: {ex}. Cannot open TCP port {port} on address {host} for listening.")
+                exit(1)
         return sock
 
     def start(self):
@@ -101,7 +109,7 @@ class AwgServer(object):
 
         print("Starting AWG server...")
         print(f"Listening on {self.host}")
-        print(f"RPCBIND on {"UDP" if self.portmap_on_udp else "TCP"} port {self.rpcbind_port}")
+        print(f"RPCBIND on {'UDP' if self.portmap_on_udp else 'TCP'} port {self.rpcbind_port}")
         print(f"VXI-11 on TCP port {self.vxi11_port}")
 
         print("Creating sockets...")

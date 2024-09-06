@@ -8,9 +8,7 @@ At a certain point after getting the SDS1204X-E oscilloscope I started to wonder
 
 The oscilloscope connects using LAN to a PC running this program. The program makes the oscilloscope think that it communicates with a genuine Siglent signal generator. The program extracts the commands sent to the generator, parses them and translates to the command set, which can be understood by the connected to the PC non-Siglent generator.
 
-The program is written in Python and uses ```sockets``` library to connect to the oscilloscope and ```serial``` library for connecting to serial AWGs, and the ```PyVISA-py``` library for connecting to others.
-
-Current version of the program was tested under Linux and MacOS only. Later, I'll test it under Windows too.
+The current version of the program was tested under Linux and MacOS only. It will likely work under Windows too, with an up to date python version.
 
 ## Supported AWG Models
 
@@ -36,17 +34,27 @@ Before starting the program you have to tell the oscilloscope how to connect to 
 
 When you start the program, it will automatically test the communication between the PC and the AWG, and start the AWG server on the PC. Once the program is up and running, you can press the ```Test Connection``` button on the oscilloscope to test the communication between the oscilloscope and the PC.
 
-## Running The Program
+## Requirements
 
-To run this program you must have Python 3.11+ installed. Python 2.7 is not supported anymore.
+To run this program you must have Python 3.8+ installed. Python 2.7 is not supported anymore.
+
+You will need the following pip packages:
+
+* ```sockets```
+* ```serial```
+* ```PyVISA-py```
+
+If you have an old python version, you may also need to upgrade the ```typing_extensions``` version (as required by PyVISA-py).
+
+## Running The Program
 
 The source code is located in the [```sds1004x_bode```](/sds1004x_bode) directory of this repository.
 
-Python ```sockets``` requires elevated privileges in Linux, therefore the program has to be run with ```su``` or ```sudo``` command. On MacOS you likely will not need ```sudo```.
+Python ```sockets``` requires elevated privileges in Linux, therefore the program has to be run with ```su``` or ```sudo``` command, or better, allow python access with a command like ```sudo setcap 'CAP_NET_BIND_SERVICE+ep' /bin/python3.10``` (to be adapted to your situation). On MacOS you likely will not need ```sudo```.
 
 The program must be run in a command line terminal. The file to be run is ```bode.py```. In order to run it, change the current path to the directory where you downloaded the source code. Then write the following command:
 
-```sudo python bode.py <awg_name> [<port>] [<baud_rate>] [-udp] [-h]```
+```python bode.py <awg_name> [<port>] [<baud_rate>] [-udp] [-h]```
 
 where
 
@@ -116,6 +124,10 @@ VXI-11 DEVICE_WRITE, SCPI command: C1:BSWV FRQ,10
 VXI-11 DESTROY_LINK, SCPI command: None
 VXI-11 moving to TCP port 9010
 ```
+
+## Some possible errors
+
+If you get an error message with  ```Address already in use. Cannot use ... for listening.```, use ```netstat``` or ```lsof``` to look what process is already using the port. It might be because you have nfs.server running via rpcbind. For that case, just disable it while running the bode plot: ```sudo systemctl stop rpcbind.socket rpcbind.service```.
 
 ## SCPI compatible AWGs
 
