@@ -1,6 +1,6 @@
-# Siglent SDS1000X-E and SDS800X-HD series Bode Plot
+# Siglent SDS1000X-E/SDS800X-HD/SDS1000X-HD series Bode Plot
 
-Bode plot with Siglent SDS1000X-E and SDS800X-HD oscilloscopes series and a non-siglent AWG.
+Bode plot with Siglent oscilloscopes (SDS1000X-E, SDS800X-HD, SDS1000X-HD, and probably others) and a non-siglent AWG.
 
 ## Overview
 
@@ -12,11 +12,13 @@ The current version of the program was tested under Linux and MacOS only. It wil
 
 ## Supported AWG Models
 
-As of August 2024 the program supports the following models:
+As of September 2024 the program supports the following models:
 
 * **Uni-Trend UTG1000x (like the UTG1022X)** This is a 2 channel 40MHz AWG. It connects to the PC via USB, and talks a dialect of the SCPI 1992.0 standard. There may be other devices that use this same dialect, so you may be able to use this driver for other AWGs. ```port``` must be a Visa compatible connection string. See below.
 
-* **Rigol DG800/DG900 series (like the DG811..DG992)**. When "liberated", that is a 2 channel 100MHz AWG with USB and (with the suitable adapter) ethernet interface, and talks a dialect of the SCPI 1992.0 standard. There may be other devices that use this same dialect, so you may be able to use this driver for other AWGs. ```port``` must be a Visa compatible connection string, be it USB or ethernet. See below.
+* **Rigol DG800/DG900/DG1000Z series (like the DG811..DG992 and DG1062Z)**. When "liberated", those are  2 channel up to 100MHz AWGs with USB and ethernet interface [^1], that talks a dialect of the SCPI 1992.0 standard. There may be other devices that use this same dialect, so you may be able to use this driver for other AWGs. ```port``` must be a Visa compatible connection string, be it USB or ethernet. See below.
+
+    [^1]: On the DG800/DG900, the ethernet interface requires a suitable adapter. It is however strongly recommended to use this interface.
 
 * **BK Precision BK4075** One channel 25MHz AWG. ```port``` must be a serial port. You must also provide ```baud_rate``` if you use another speed than 19200. See below. You might also be able to get this AWG working via the visa driver.
 
@@ -178,17 +180,15 @@ I'd like to add here more AWGs but it's impossible to have them all at the home 
 
 * **Dmitry Melnichansky [@4x1md](https://github.com/4x1md)** - Project idea and implementation.
 
+* **hb020** - Allow use with the newer SDS800x HD (12 bit) scopes, Driver for Rigol DG800/DG900 series, maintenance since May 2024.
+  
 * **Nick Bryant (Dundarave on EEVblog Forum)** - Driver for Feeltech FY6600 AWG.
 
 * **Don F Becker** - Driver for AD9910 Arduino Shield.
 
-* **hb020** - Allow use with the newer SDS800x HD (12 bit) scopes, Driver for Rigol DG800/DG900 series.
-
 * **alfredfo** - driver for Uni-Trend UTG1000x.
 
 * **3tch-a-sketch** - generic Feeltech FY driver.
-
-* **hb020** - Driver for Rigol DG800/DG900 series, and adaptation for SDS800X-HD series
 
 ## Links
 
