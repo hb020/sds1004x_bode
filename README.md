@@ -40,8 +40,7 @@ To run this program you must have Python 3.8+ installed. Python 2.7 is not suppo
 
 You will need the following pip packages:
 
-* ```sockets```
-* ```serial```
+* ```pyserial```
 * ```PyVISA-py```
 
 If you have an old python version, you may also need to upgrade the ```typing_extensions``` version (as required by PyVISA-py).
