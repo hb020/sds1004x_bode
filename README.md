@@ -49,7 +49,7 @@ If you have an old python version, you may also need to upgrade the ```typing_ex
 
 The source code is located in the [```sds1004x_bode```](/sds1004x_bode) directory of this repository.
 
-Python ```sockets``` requires elevated privileges in Linux, therefore the program has to be run with ```su``` or ```sudo``` command, or better, allow python access with a command like ```sudo setcap 'CAP_NET_BIND_SERVICE+ep' /bin/python3.10``` (to be adapted to your situation). On MacOS you likely will not need ```sudo```.
+Under Linux, Python ```sockets``` requires elevated privileges, therefore the program has to be run with ```su``` or ```sudo```, or better, allow python access with a command like ```sudo setcap 'CAP_NET_BIND_SERVICE+ep' /bin/python3.10``` (to be adapted to your situation). On MacOS and Windows you likely will not need all this.
 
 The program must be run in a command line terminal. The file to be run is ```bode.py```. In order to run it, change the current path to the directory where you downloaded the source code. Then write the following command:
 
