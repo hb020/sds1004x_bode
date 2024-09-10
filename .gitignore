@@ -7,3 +7,6 @@ __pycache__/
 .project
 .pydevproject
 .DS_Store
+
+# private VSCode settings
+.vscode

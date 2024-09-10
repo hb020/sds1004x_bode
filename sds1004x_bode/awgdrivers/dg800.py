@@ -169,8 +169,11 @@ class RigolDG800(BaseAWG):
             self.set_amplitude(1, amplitude)
             self.set_amplitude(2, amplitude)
         else:
-            # Adjust the amplitude to the defined load impedance
-            amplitude = amplitude / self.v_out_coeff[channel - 1]
+            # For Rigols it is not necessary to adjust the amplitude to the defined load impedance
+            # amplitude = amplitude / self.v_out_coeff[channel - 1]
+            # SDS1000X HD sends always the voltage as VPP, even if set to VRMS in the Bode plot setup of the scope
+            # Rigols interpret the amplitude to have the unit that was used by the last manual entry or the last UNIT command
+            self._send_command(f":SOURCE{channel}:VOLT:UNIT VPP") 
             self._send_command(f":SOURCE{channel}:VOLT:AMPL {amplitude:.3f}")
 
     def set_offset(self, channel: int, offset: float):
