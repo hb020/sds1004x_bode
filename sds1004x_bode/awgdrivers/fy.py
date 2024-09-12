@@ -128,7 +128,7 @@ class FygenAWG(BaseAWG):
         del wave_type  # This parameter is ignored, always set a sin wave
         self._retry(channel, "W", "0", "0")
 
-    def set_amplitue(self, channel: int, amp):
+    def set_amplitude(self, channel: int, amp):
         """Sets a channel amplitude in volts.
           Load impedeance for the channel is taken into account
           when calculating the amplitude.  For example, if the load
