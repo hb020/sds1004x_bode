@@ -43,8 +43,6 @@ class RigolDG800(BaseAWG):
         self.m = None
         self.timeout = timeout
         self.channel_on = [False, False]
-        self.r_load = [DEFAULT_LOAD, DEFAULT_LOAD]
-        self.v_out_coeff = [1, 1]
 
     def _send_command(self, cmd):
         # local function to send a command and check for errors
@@ -169,8 +167,11 @@ class RigolDG800(BaseAWG):
             self.set_amplitude(1, amplitude)
             self.set_amplitude(2, amplitude)
         else:
-            # Adjust the amplitude to the defined load impedance
-            amplitude = amplitude / self.v_out_coeff[channel - 1]
+            # For Rigols it is not necessary to adjust the amplitude to the defined load impedance
+            # amplitude = amplitude / self.v_out_coeff[channel - 1]
+            # SDS1000X HD sends always the voltage as VPP, even if set to VRMS in the Bode plot setup of the scope
+            # Rigols interpret the amplitude to have the unit that was used by the last manual entry or the last UNIT command
+            self._send_command(f":SOURCE{channel}:VOLT:UNIT VPP") 
             self._send_command(f":SOURCE{channel}:VOLT:AMPL {amplitude:.3f}")
 
     def set_offset(self, channel: int, offset: float):
@@ -183,8 +184,6 @@ class RigolDG800(BaseAWG):
             self.set_offset(1, offset)
             self.set_offset(2, offset)
         else:
-            # Adjust the offset to the defined load impedance
-            offset = offset / self.v_out_coeff[channel - 1]
             self._send_command(f":SOURCE{channel}:VOLT:OFFS {offset}")
 
     def set_load_impedance(self, channel: int, z: float):
@@ -198,11 +197,13 @@ class RigolDG800(BaseAWG):
             self.set_load_impedance(1, z)
             self.set_load_impedance(2, z)
         else:
-            if z == constants.HI_Z:
-                v_out_coeff = 1
-            else:
-                v_out_coeff = z / (z + (DEFAULT_LOAD * 1.0))
-            self.v_out_coeff[channel - 1] = v_out_coeff
+            # The maximum load impedance that can be defined in a Rigol is 10kOhms
+            # The current Bode implementation on the Siglent scope allows for values
+            # of 50, 75, 600, Hi-Z. But the scope actually sends a value of 1MOhms (1000000)
+            # when setting the load impedance to Hi-Z. The Rigol refuses this setting and
+            # sets 10KOhms instead. With this we force it to Hi-Z.
+            if z > 10000:
+                z = "INF"
             self._send_command(f":OUTPUT{channel}:IMP {z}")
 
 
