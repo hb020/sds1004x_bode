@@ -53,8 +53,8 @@ class FY6600(BaseAWG):
         self.ser.close()
 
     def send_command(self, cmd):
+        cmd = (cmd + EOL).encode()
         self.ser.write(cmd)
-        self.ser.write(EOL)
         time.sleep(SLEEP_TIME)
 
     def initialize(self):
@@ -64,7 +64,7 @@ class FY6600(BaseAWG):
 
     def get_id(self) -> str:
         self.send_command("UID")
-        ans = self.ser.read_until(terminator="\r\n", size=None)
+        ans = self.ser.read_until("\r\n".encode("utf8"), size=None).decode("utf8")
         return ans
 
     def enable_output(self, channel: int = None, on: bool = False):

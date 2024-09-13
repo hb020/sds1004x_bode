@@ -20,7 +20,7 @@ STOP_BITS = serial.STOPBITS_ONE
 TIMEOUT = 5
 
 # Data packet ends with CR LF (\r\n) characters
-EOL = b'\x0D\x0A'
+EOL = '\x0D\x0A'
 # Channels validation tuple
 CHANNELS = (0, 1, 2)
 CHANNELS_ERROR = "Channel can be 1 or 2."
@@ -53,8 +53,8 @@ class JDS6600(BaseAWG):
         self.ser.close()
 
     def send_command(self, cmd):
+        cmd = (cmd + EOL).encode()
         self.ser.write(cmd)
-        self.ser.write(EOL)
         time.sleep(SLEEP_TIME)
 
     def initialize(self):
@@ -64,7 +64,7 @@ class JDS6600(BaseAWG):
 
     def get_id(self) -> str:
         self.send_command(":r01=0.")
-        ans = self.ser.read_until(terminator=".\r\n", size=None)
+        ans = self.ser.read_until(".\r\n".encode("utf8"), size=None).decode("utf8")
         ans = ans.replace(":ok", "")
         ans = ans.strip()
         return ans.strip()

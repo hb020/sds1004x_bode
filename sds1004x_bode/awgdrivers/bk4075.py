@@ -64,8 +64,8 @@ class BK4075(BaseAWG):
         self.ser.close()
 
     def send_command(self, cmd):
+        cmd = (cmd + EOL).encode()        
         self.ser.write(cmd)
-        self.ser.write(EOL)
         time.sleep(SLEEP_TIME)
 
     def initialize(self):
@@ -80,7 +80,7 @@ class BK4075(BaseAWG):
         self.ser.reset_input_buffer()
         self.send_command("*IDN?")
         time.sleep(SLEEP_TIME)
-        ans = self.ser.read_until(terminator=EOL, size=None)
+        ans = self.ser.read_until(EOL.encode("utf8"), size=None).decode("utf8")
         return ans.strip()
 
     def enable_output(self, channel: int = None, on: bool = False):

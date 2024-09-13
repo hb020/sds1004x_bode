@@ -19,17 +19,24 @@ TIMEOUT = 5
 
 if __name__ == '__main__':
 
+    # default values
+    baud = None
+    # port = "/dev/ttyUSB0"
+    # port = "/dev/tty.usbserial-FTHJGC2Z"
+        
     # awg_name = "dummy"
-    # port = None
-    # baud = None
 
     # awg_name = "jds6600"
     # port = "/dev/ttyUSB0"
-    # baud = 115200
 
     # awg_name = "fy6600"
     # port = "/dev/ttyUSB0"
-    # baud = 19200
+    
+    # awg_name = "fy"
+    # port = "/dev/ttyUSB0"
+    
+    # awg_name = "ad9910"
+    # port = "/dev/ttyUSB0"        
 
     # awg_name = "bk4075"
     # port = "/dev/ttyUSB0"
@@ -38,7 +45,6 @@ if __name__ == '__main__':
     awg_name = "dg800"
     # awg_name = "utg1000x"
     port = "TCPIP::192.168.007.204::INSTR"
-    baud = None
     
     awg_class = awg_factory.get_class_by_name(awg_name)
 
