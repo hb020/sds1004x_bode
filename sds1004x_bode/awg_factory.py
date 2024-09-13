@@ -9,8 +9,9 @@ Update of original file on Nov. 17 2018 by Dundarave to add entries needed for F
 from awgdrivers.dummy_awg import DummyAWG
 from awgdrivers.jds6600 import JDS6600
 from awgdrivers.bk4075 import BK4075
-from awgdrivers.fy6600 import FY6600
 from awgdrivers.fy import FygenAWG
+from awgdrivers.fy6900 import Fy6900AWG
+from awgdrivers.fy6600 import FY6600
 from awgdrivers.ad9910 import AD9910
 from awgdrivers.dg800 import RigolDG800
 from awgdrivers.utg1000x import UTG1000x
@@ -40,8 +41,9 @@ drivers = (
     DummyAWG,
     JDS6600,
     BK4075,
-    FY6600,
     FygenAWG,
+    Fy6900AWG,
+    FY6600,
     AD9910,
     RigolDG800,
     UTG1000x

@@ -22,7 +22,7 @@ if __name__ == '__main__':
     # default values
     baud = None
     # port = "/dev/ttyUSB0"
-    # port = "/dev/tty.usbserial-FTHJGC2Z"
+    port = "/dev/tty.usbserial-FTHJGC2Z"
         
     # awg_name = "dummy"
 
@@ -35,6 +35,9 @@ if __name__ == '__main__':
     # awg_name = "fy"
     # port = "/dev/ttyUSB0"
     
+    awg_name = "fy6900"
+    # port = "/dev/ttyUSB0"
+
     # awg_name = "ad9910"
     # port = "/dev/ttyUSB0"        
 
@@ -42,9 +45,9 @@ if __name__ == '__main__':
     # port = "/dev/ttyUSB0"
     # baud = 19200
     
-    awg_name = "dg800"
+    # awg_name = "dg800"
     # awg_name = "utg1000x"
-    port = "TCPIP::192.168.007.204::INSTR"
+    # port = "TCPIP::192.168.007.204::INSTR"
     
     awg_class = awg_factory.get_class_by_name(awg_name)
 

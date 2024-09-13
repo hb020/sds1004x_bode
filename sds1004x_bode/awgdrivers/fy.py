@@ -27,11 +27,6 @@ RETRY_COUNT = 2
 VERBOSE = False  # Set to True for protocol debugging 
 
 
-def debug(msg, *args):
-    if VERBOSE:
-        print(msg % args)
-
-
 class FygenAWG(BaseAWG):
     """Driver API."""
 
@@ -48,6 +43,11 @@ class FygenAWG(BaseAWG):
             1: None,
             2: None,
         }
+        self.verbose = VERBOSE
+        
+    def debug(self, msg, *args):
+        if self.verbose:
+            print(msg % args)
 
     def connect(self):
         if self.port:
@@ -64,13 +64,13 @@ class FygenAWG(BaseAWG):
             xonxoff=False,
             timeout=self.timeout)
 
-        debug("Connected to %s", self.serial_path)
+        self.debug("Connected to %s", self.serial_path)
         self.port.reset_output_buffer()
         self.port.reset_input_buffer()
 
     def disconnect(self):
         if self.port:
-            debug("Disconnected from %s", self.serial_path)
+            self.debug("Disconnected from %s", self.serial_path)
             self.port.close()
             self.port = None
 
@@ -104,7 +104,7 @@ class FygenAWG(BaseAWG):
         def match_hz_only(match, got):
             if '.' in got and match == got[:got.index('.')]:
                 return True
-            debug('set_frequency mismatch (looking at Hz value only)')
+            self.debug('set_frequency mismatch (looking at Hz value only)')
             return False
 
         self._retry(
@@ -179,12 +179,12 @@ class FygenAWG(BaseAWG):
     def _recv(self, command):
         """Waits for device."""
         response = self.port.read_until(size=MAX_READ_SIZE).decode("utf8")
-        debug("%s -> %s", command.strip(), response.strip())
+        self.debug("%s -> %s", command.strip(), response.strip())
         return response
 
     def _send(self, command, retry_count=5):
         """Sends a low-level command. Returns the response."""
-        debug("send (attempt %u/5) -> %s", 6 - retry_count, command)
+        self.debug("send (attempt %u/5) -> %s", 6 - retry_count, command)
 
         data = command + "\n"
         data = data.encode()
@@ -222,15 +222,15 @@ class FygenAWG(BaseAWG):
                 return match == got
 
         if match_fn(match, self._send("R" + channel + command)):
-            debug("already set %s", match)
+            self.debug("already set %s", match)
             return
 
         for _ in range(RETRY_COUNT):
             self._send("W" + channel + command + value)
             if match_fn(match, self._send("R" + channel + command)):
-                debug("matched %s", match)
+                self.debug("matched %s", match)
                 return
-            debug("mismatched %s", match)
+            self.debug("mismatched %s", match)
 
         # Print a warning.  This is not an error because the AWG read bugs
         # worked-around in this module could vary by AWG model number or

@@ -24,9 +24,11 @@ As of September 2024 the program supports the following models:
 
 * **RD JDS6600** Chinese generator which is widely sold on eBay and AliExpress. ```port``` must be a serial port. See below.
 
-* **Feeltech FY6600** Another Chinese generator which is widely sold on eBay and AliExpress. ```port``` must be a serial port. See below.
+* **Feeltech FYxxxx** A range of Chinese generators. This driver is a newer driver than has some improvements over the older FY6600 driver, and supports FY2300, FY6600, FY6800, the older FY6900 and probably more. ```port``` must be a serial port. See below.
 
-* **Feeltech FYxxxx** A range of Chinese generators. This driver has some improvements over the FY6600 driver, and supports FY2300, FY6600, FY6800, FY6900 and probably more. ```port``` must be a serial port. See below.
+* **Feeltech FY6900** A Chinese generator. This driver has some improvements that are needed for the later FY6900 versions, that require the frequency to be sent as Hz instead of uHz. For the rest it is the same driver as the generic FY driver. ```port``` must be a serial port. See below.
+
+* **Feeltech FY6600** Another Chinese generator which is widely sold on eBay and AliExpress. This is an older driver that has less checking. Use it when the the above drivers do not work. This will however mean that some changes to the above drivers might be needed. ```port``` must be a serial port. See below.
 
 * **AD9910 Arduino Shield** [DDS AD9910 Shield](https://gra-afch.com/catalog/rf-units/dds-ad9910-arduino-shield/). ```port``` must be a serial port. See below.
 
@@ -59,7 +61,7 @@ The program must be run in a command line terminal. The file to be run is ```bod
 
 where
 
-* ```<awg_name>``` is the name of the AWG connected to your PC:  ```jds6600```, ```bk4075```, ```fy6600```, ```fy```, ```ad9910```, ```dg800```, ```utg1000x``` or ```dummy```.
+* ```<awg_name>``` is the name of the AWG connected to your PC:  ```jds6600```, ```bk4075```, ```fy6600```, ```fy```, ```fy6900```, ```ad9910```, ```dg800```, ```utg1000x``` or ```dummy```.
 
 * ```<port>``` is the port to which your AWG is connected. The type depends on you AWG, see the explanations above. For serial port AWGs, it will be something like ```/dev/ttyUSB0``` or ```/dev/ttyACM0```. If you use the ```dummy``` generator, you don't have to specify the port. If you use one of the SCPI compatible devices like the ```dg800``` or ```utg1000x```, you must specify a Visa compatible connection string, like ```TCPIP::192.168.001.204::INSTR``` or ```USB0::9893::6453::DG1234567890A::0::INSTR```
 
@@ -135,6 +137,11 @@ If you get an error message with  ```Address already in use. Cannot use ... for 
 Many different SCPI dialects exist. If you have an AWG that is not listed but is SCPI compatible, you may try one of the existing SCPI drivers (```dg800``` or ```utg1000x```). If you want to do a quick test, adapt `awg_tests.py` to your device and address, it will test all commands. If your device does not talk one of the existing dialects, you can create a new one easily by using one of the existing drivers as example. Please tell us if you have done so (via github Issue or Pull request), so that we can add the device to the list.
 
 ## Changelog
+
+### 2024-09-14
+
+* new driver for newer fy6900 devices.
+* better serial port handling for some drivers.
 
 ### 2024-09-06
 
