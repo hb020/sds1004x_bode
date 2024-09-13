@@ -28,7 +28,7 @@ As of September 2024 the program supports the following models:
 
 * **Feeltech FY6900** A Chinese generator. This driver has some improvements that are needed for the later FY6900 versions, that require the frequency to be sent as Hz instead of uHz. For the rest it is the same driver as the generic FY driver. ```port``` must be a serial port. See below.
 
-* **Feeltech FY6600** Another Chinese generator which is widely sold on eBay and AliExpress. This is an older driver that has less checking. Use it when the the above drivers do not work. This will however mean that some changes to the above drivers might be needed. ```port``` must be a serial port. See below.
+* **Feeltech FY6600** Another Chinese generator which is widely sold on eBay and AliExpress. This is an older driver that has less checking. Use it when the above drivers do not work. This will however mean that some changes to the above drivers might be needed. ```port``` must be a serial port. See below.
 
 * **AD9910 Arduino Shield** [DDS AD9910 Shield](https://gra-afch.com/catalog/rf-units/dds-ad9910-arduino-shield/). ```port``` must be a serial port. See below.
 
