@@ -34,10 +34,12 @@ class Fy6900AWG(FygenAWG):
             self.debug('set_frequency mismatch (looking at Hz value only)')
             return False
 
+        # at least 8 digits before the . and 6 behind.  
+        # "%.6f" also works, but this is more like the latest espbode implementation to make comparisons easy
         self._retry(
             channel,
             "F",
-            "%08.6f" % freq,
+            "%015.6f" % freq,
             "%08u" % int(freq),
             match_fn=match_hz_only)
 
