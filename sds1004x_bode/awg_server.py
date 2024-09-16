@@ -228,8 +228,10 @@ class AwgServer(object):
         while True:
             rx_buf = connection.recv(255)
             if len(rx_buf) > 0:
+                resp = b''  # default
+                
                 # Parse incoming VXI-11 command
-                status, vxi11_procedure, scpi_command = self.parse_lxi_request(rx_buf)
+                status, vxi11_procedure, scpi_command, cmd_length = self.parse_lxi_request(rx_buf)
 
                 if status == NOT_VXI11_ERROR:
                     print("Received VXI-11 request from an unknown source.")
@@ -250,6 +252,7 @@ class AwgServer(object):
                     VXI-11 DEVICE_WRITE function requires an empty reply.
                     """
                     self.parser.parse_scpi_command(scpi_command)
+                    resp = self.generate_lxi_device_write_response(cmd_length)
 
                 elif vxi11_procedure == DEVICE_READ:
                     """
@@ -279,7 +282,7 @@ class AwgServer(object):
                     All we have to do is to exit the loop and continue listening to
                     RPCBIND requests.
                     """
-                    break
+                    resp = self.generate_lxi_destroy_link_response()
 
                 else:
                     """
@@ -293,6 +296,9 @@ class AwgServer(object):
                 xid = self.get_xid(rx_buf[0x04:])
                 resp_data = self.generate_resp_data(xid, resp)
                 connection.send(resp_data)
+                
+                if vxi11_procedure == DESTROY_LINK:
+                    break
 
         # Close connection
         connection.close()
@@ -303,7 +309,8 @@ class AwgServer(object):
         @return: a tuple with 3 values:
                 1. status - is 0 if the request could be processed, error code otherwise.
                 2. VXI-11 procedure id if it is known, None otherwise.
-                3. string containing SCPI command if it exists in the request."""
+                3. string containing SCPI command if it exists in the request, in utf-8.
+                4. the length of the sent command, in bytes (needed for some replies)."""
         # Validate source program id.
         #  If the request doesn't come from VXI-11 Core (395183), it is ignored.
         program_id = self.bytes_to_uint(rx_data[0x10:0x14])
@@ -314,6 +321,7 @@ class AwgServer(object):
         vxi11_procedure = self.bytes_to_uint(rx_data[0x18:0x1c])
         scpi_command = None
         status = OK
+        cmd_length = 0
 
         # Process the remaining data according to the received VXI-11 request
         if vxi11_procedure == CREATE_LINK:
@@ -332,7 +340,7 @@ class AwgServer(object):
 
         if scpi_command is not None:
             scpi_command = scpi_command.decode('utf-8').strip()
-        return (status, vxi11_procedure, scpi_command)
+        return (status, vxi11_procedure, scpi_command, cmd_length)
 
     def get_xid(self, rx_packet):
         """
@@ -428,17 +436,34 @@ class AwgServer(object):
         # resp += self.uint_to_bytes(8388608)
         resp += b"\x00\x80\x00\x00"
         return resp
+    
+    def generate_lxi_destroy_link_response(self):
+        """Generates reply to VXI-11 DESTROY_LINK request."""
+        # VXI-11 response
+        #  Error Code: No Error (0)
+        resp = b"\x00\x00\x00\x00"
+        return resp
 
+    def generate_lxi_device_write_response(self, cmd_length):
+        """Generates reply to VXI-11 DEVICE_WRITE request."""
+        # VXI-11 response
+        #  Error Code: No Error (0)
+        resp = b"\x00\x00\x00\x00"
+        #  Size: the size of the original command
+        resp += self.uint_to_bytes(cmd_length)
+        return resp        
+        
     def generate_lxi_idn_response(self, id_string):
+        """Generates reply to VXI-11 DEVICE_READ request."""
         # Error Code: No Error (0)
         resp = b"\x00\x00\x00\x00"
         # Reason: 0x00000004 (END)
         resp += b"\x00\x00\x00\x04"
         # Add the AWG id string
-        id_length = len(id_string) + 3
+        id_length = len(id_string) + 1
         resp += self.uint_to_bytes(id_length)
         resp += id_string
-        # The sequence ends with \n and two \0 termination bytes.
+        # The sequence ends with \n and two \0 fill bytes.
         resp += b"\x0A\x00\x00"
         return resp
 
