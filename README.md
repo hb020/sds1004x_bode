@@ -138,10 +138,11 @@ Many different SCPI dialects exist. If you have an AWG that is not listed but is
 
 ## Changelog
 
-### 2024-09-14
+### 2024-09-16
 
 * new driver for newer fy6900 devices.
 * better serial port handling for some drivers.
+* better VISA compliance.
 
 ### 2024-09-06
 
