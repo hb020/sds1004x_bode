@@ -1,9 +1,18 @@
 '''
 Created on Apr 14, 2018
 
-@author: 4x1md
+@author: 4x1md, hb020
+
+
+This file contains the classes for the rpcbind port mapper (on TCP and UDP) and the VXI-11 listener.
+
+It starts the port mappers as separate processes and runs the VXI-11 loop in the main process.
+
+The port changes of the VXI-11 loop are communicated to the port mappers via a shared variable (with locking).
+
 '''
 
+import multiprocessing
 import socket
 from awgdrivers.base_awg import BaseAWG
 from command_parser import CommandParser
@@ -45,9 +54,304 @@ UNKNOWN_COMMAND_ERROR = -4
 OK = 0
 
 
-class AwgServer(object):
+class CommsObject(object):
+    """
+    Base class for the network interactions
+    """
+    
+    def create_socket(self, host: str, port: int, on_udp: bool, myname: str):
+        """Create a UDP or TCP socket, and starts listening
 
-    def __init__(self, awg, host=None, rpcbind_port=None, vxi11_portrange_start=None, vxi11_portrange_end=None, portmap_on_udp=True):
+        :param host: host
+        :type host: str
+        :param port: port
+        :type port: int
+        :param on_udp: True for UDP
+        :type on_udp: bool
+        :param myname: the name to use in error messages
+        :type myname: str
+        :return: the socket
+        :rtype: socket.socket
+        """
+        if on_udp:
+            try:
+                sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+                sock.bind((host, port))
+            except OSError as ex:
+                print(f"{myname}: Fatal error: {ex}. Cannot open UDP port {port} on address {host} for listening.")
+                exit(1)
+        else:
+            try:
+                sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+                # Disable the TIME_WAIT state of connected sockets, and allow reuse, as I switch ports rather quickly
+                sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+                sock.bind((host, port))
+                sock.listen(1)  # Become a server socket, maximum 1 connection
+            except OSError as ex:
+                print(f"{myname}: Fatal error: {ex}. Cannot open TCP port {port} on address {host} for listening.")
+                exit(1)
+        return sock
+        
+    def get_xid(self, rx_packet):
+        """
+        Extracts XID from the incoming RPC packet.
+        """
+        xid = rx_packet[0x00:0x04]
+        return xid
+    
+    def generate_packet_size_header(self, size):
+        """
+        Generates the header containing reply packet size.
+        """
+        # 1... .... .... .... .... .... .... .... = Last Fragment: Yes
+        size = size | 0x80000000
+        # .000 0000 0000 0000 0000 0000 0001 1100 = Fragment Length: 28
+        res = self.uint_to_bytes(size)
+        return res
+    
+    def generate_resp_data(self, xid, resp, on_udp=False):
+        """
+        Generates the response data to be sent to the oscilloscope.
+        """
+        # Generate RPC header
+        rpc_hdr = self.generate_rpc_header(xid)
+        if on_udp:
+            # Merge all the headers
+            resp_data = rpc_hdr + resp
+        else:
+            # Generate packet size header
+            data_size = len(rpc_hdr) + len(resp)
+            size_hdr = self.generate_packet_size_header(data_size)
+            # Merge all the headers
+            # debug: print(f"size_hdr: [{' '.join(format(x, '02x') for x in size_hdr)}]")
+            # debug: print(f"rpc_hdr: [{' '.join(format(x, '02x') for x in rpc_hdr)}]")
+            # debug: print(f"resp: [{' '.join(format(x, '02x') for x in resp)}]")
+            resp_data = size_hdr + rpc_hdr + resp
+        return resp_data    
+
+    def generate_rpc_header(self, xid):
+        """
+        Generates RPC header for replying to oscilloscope's requests.
+        @param xid: XID from the request packet as bytes sequence.
+        """
+
+        hdr = b""
+
+        # XID: 0xXXXXXXXX (4 bytes)
+        hdr += xid
+        # Message Type: Reply (1)
+        hdr += b"\x00\x00\x00\x01"
+        # Reply State: accepted (0)
+        hdr += b"\x00\x00\x00\x00"
+        # Verifier
+        #  Flavor: AUTH_NULL (0)
+        hdr += b"\x00\x00\x00\x00"
+        #  Length: 0
+        hdr += b"\x00\x00\x00\x00"
+        # Accept State: RPC executed successfully (0)
+        hdr += b"\x00\x00\x00\x00"
+        return hdr
+
+    # =========================================================================
+    #   Helper functions
+    # =========================================================================
+
+    def bytes_to_uint(self, bytes_seq):
+        """
+        Converts a sequence of 4 bytes to 32-bit integer. Byte 0 is MSB.
+        """
+        return int.from_bytes(bytes_seq, "big")
+        # num = ord(bytes_seq[0])
+        # num = num * 0x100 + ord(bytes_seq[1])
+        # num = num * 0x100 + ord(bytes_seq[2])
+        # num = num * 0x100 + ord(bytes_seq[3])
+        # return num
+
+    def uint_to_bytes(self, num):
+        """
+        Converts a 32-bit integer to a sequence of 4 bytes. Byte 0 is MSB.
+        """
+        return num.to_bytes(4, "big")
+        # byte3 = (num / 0x1000000) & 0xFF
+        # byte2 = (num / 0x10000) & 0xFF
+        # byte1 = (num / 0x100) & 0xFF
+        # byte0 = num & 0xFF
+        # bytes_seq = bytearray((byte3, byte2, byte1, byte0))
+        # return bytes_seq
+
+    def print_as_hex(self, buf):
+        """
+        Prints a buffer as a set of hexadecimal numbers.
+        Created for debug purposes.
+        """
+        buf_str = ""
+        for b in buf:
+            buf_str += "0x%X " % ord(b)
+        print(buf_str)
+            
+
+class Portmapper(CommsObject, multiprocessing.Process):
+    """Port mapper "thread" class
+    """
+    
+    def __init__(self, host: str, rpcbind_port: int, on_udp: bool, vxi11_port):
+        """init the port mapper.
+        It will start the portmapper in a separate process.
+
+        :param host: host
+        :type host: str
+        :param rpcbind_port: port
+        :type rpcbind_port: int
+        :param on_udp: True for UDP
+        :type on_udp: bool
+        :param vxi11_port: the port used by the VXI-11 service
+        :type vxi11_port: multiprocessing.Value
+        """
+        multiprocessing.Process.__init__(self)
+        self.exit = multiprocessing.Event()
+
+        if host is not None:
+            self.host = host
+        else:
+            self.host = HOST
+
+        if not isinstance(rpcbind_port, (int, type(None))):
+            raise TypeError("rpcbind_port must be an integer.")
+        if rpcbind_port is not None:
+            self.rpcbind_port = rpcbind_port
+        else:
+            self.rpcbind_port = RPCBIND_PORT
+        self.on_udp = on_udp
+        self.vxi11_port = vxi11_port
+        self.myname = f"{'UDP' if on_udp else 'TCP'}Portmapper"
+        
+    def run(self):
+        """
+        Run the main loop of the mapper
+        """
+        try:
+            # Create RPCBIND socket
+            self.rpcbind_socket = self.create_socket(self.host, self.rpcbind_port, self.on_udp, self.myname)
+            
+            while not self.exit.is_set():
+                # VXI-11 requests are processed after receiving a valid RPCBIND request.
+                # print(f"{self.myname}: Waiting for connection request...")
+                if self.on_udp:
+                    res = self.process_rpcbind_request_udp()
+                else:
+                    res = self.process_rpcbind_request_tcp()
+                if res != OK:
+                    print("Incompatible RPCBIND request.")
+        except KeyboardInterrupt:
+            pass                
+        # print(f"{self.myname}: shut down")
+    
+    def terminate(self):
+        # not used normally, just in case the awgserver shuts down
+        print(f"{self.myname}: terminate()")
+        self.exit.set()
+           
+    def process_rpcbind_request_tcp(self):
+        """Replies to RPCBIND/Portmap request and sends VXI-11 port number to the oscilloscope."""
+        # RFC 1057 and RFC 1833 apply here. The scope uses V2, so RFC 1057 suffices.
+
+        connection, address = self.rpcbind_socket.accept()
+        rx_data = connection.recv(128)
+        if len(rx_data) > 4:
+            rx_data = rx_data[0x04:]  # start from XID, as with UDP
+            print(f"{self.myname}: Incoming connection from {address[0]}:{address[1]}.")
+            # Validate the request.
+            #  If the request is not GETPORT or does not come from VXI-11 Core (395183),
+            #  we have nothing to do wit it
+            procedure = self.get_procedure(rx_data)
+            if procedure != GET_PORT:
+                return NOT_GET_PORT_ERROR
+            program_id = self.get_program_id(rx_data)
+            if program_id != VXI11_CORE_ID:
+                return NOT_VXI11_ERROR
+            # Generate and send response
+            resp = self.generate_rpcbind_response()
+            xid = self.get_xid(rx_data)
+            resp_data = self.generate_resp_data(xid, resp, False)
+            connection.send(resp_data)
+        # Close connection and RPCBIND socket.
+        connection.close()
+        return OK
+    
+    def process_rpcbind_request_udp(self):
+        """Replies to RPCBIND/Portmap request and sends VXI-11 port number to the oscilloscope."""
+        # RFC 1057 and RFC 1833 apply here. The scope uses V2, so RFC 1057 suffices.
+        
+        bufferSize = 1024
+        bytesAddressPair = self.rpcbind_socket.recvfrom(bufferSize)
+
+        rx_data = bytesAddressPair[0]
+        address = bytesAddressPair[1]
+
+        if len(rx_data) > 0:
+            print(f"{self.myname}: Incoming connection from {address[0]}:{address[1]}.")
+            # Validate the request.
+            #  If the request is not GETPORT or does not come from VXI-11 Core (395183),
+            #  we have nothing to do wit it
+            # debug: print(f"Data: [{' '.join(format(x, '02x') for x in rx_data)}]")
+            #  This should be: 
+            #  ....XID.... 00 00 00 00  00 00 00 02 00 01 86 a0 
+            #  00 00 00 02 00 00 00 03  00 00 00 00 00 00 00 00 
+            #  00 00 00 00 00 00 00 00  00 06 07 af 00 00 00 01 
+            #  00 00 00 06 00 00 00 00
+            procedure = self.get_procedure(rx_data)
+            if procedure != GET_PORT:
+                return NOT_GET_PORT_ERROR
+            program_id = self.get_program_id(rx_data)
+            if program_id != VXI11_CORE_ID:
+                return NOT_VXI11_ERROR
+            # Generate and send response
+            resp = self.generate_rpcbind_response()
+            xid = self.get_xid(rx_data)
+            # debug: print(f"XID: [{' '.join(format(x, '02x') for x in xid)}]")
+            resp_data = self.generate_resp_data(xid, resp, True)
+            # debug: print(f"resp_data: [{' '.join(format(x, '02x') for x in resp_data)}]")
+            self.rpcbind_socket.sendto(resp_data, address)
+
+        return OK    
+    
+    def generate_rpcbind_response(self):
+        """Returns VXI-11 port number as response to RPCBIND request."""
+        # self.vxi11_port is a multiprocessing.Value object, that is a ctypes object in shared memory
+        # that is synchronized using RLock. So it always gets the latest value.
+        myport = self.vxi11_port.value
+        print(f"{self.myname}: Sending to TCP port {myport}")
+        resp = self.uint_to_bytes(myport)
+        return resp
+    
+    def get_procedure(self, rx_packet):
+        """
+        Extracts procedure from the incoming RPC packet.
+        """
+        return self.bytes_to_uint(rx_packet[0x14:0x18])
+
+    def get_program_id(self, rx_packet):
+        """
+        Extracts program_id from the incoming RPC packet.
+        """
+        return self.bytes_to_uint(rx_packet[0x28:0x2C])
+        
+    def close_socket(self):
+        """
+        Closes RPCBIND socket.
+        """
+        try:
+            self.rpcbind_socket.close()
+        except:
+            pass
+
+    def __del__(self):
+        self.close_socket()    
+    
+
+class AwgServer(CommsObject):
+
+    def __init__(self, awg, host=None, rpcbind_port=None, vxi11_portrange_start=None, vxi11_portrange_end=None):
         if host is not None:
             self.host = host
         else:
@@ -74,49 +378,28 @@ class AwgServer(object):
         else:
             self.vxi11_portrange_end = VXI11_PORTRANGE_END
 
-        self.vxi11_port = self.vxi11_portrange_start
+        self.vxi11_port = multiprocessing.Value('I', self.vxi11_portrange_start)
             
-        self.portmap_on_udp = portmap_on_udp
-
         if awg is None or not isinstance(awg, BaseAWG):
             raise TypeError("awg variable must be of AWG class.")
         self.awg = awg
-
-    def create_socket(self, host, port, on_udp):
-        if on_udp:
-            try:
-                sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-                sock.bind((host, port))
-            except OSError as ex:
-                print(f"Fatal error: {ex}. Cannot open UDP port {port} on address {host} for listening.")
-                exit(1)
-        else:
-            try:
-                sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-                # Disable the TIME_WAIT state of connected sockets, and allow reuse, as I switch ports rather quickly
-                sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-                sock.bind((host, port))
-                sock.listen(1)  # Become a server socket, maximum 1 connection
-            except OSError as ex:
-                print(f"Fatal error: {ex}. Cannot open TCP port {port} on address {host} for listening.")
-                exit(1)
-        return sock
-
+        self.myname = "VXI-11"
+        self.pm1 = None
+        self.pm2 = None
+            
     def start(self):
         """
         Makes all required initializations and starts the server.
         """
 
         print("Starting AWG server...")
-        print(f"Listening on {self.host}")
-        print(f"RPCBIND on {'UDP' if self.portmap_on_udp else 'TCP'} port {self.rpcbind_port}")
-        print(f"VXI-11 on TCP port {self.vxi11_port}")
-
-        print("Creating sockets...")
-        # Create RPCBIND socket
-        self.rpcbind_socket = self.create_socket(self.host, self.rpcbind_port, self.portmap_on_udp)
+        
+        print(f"Portmapper: Listening to UDP and TCP ports on {self.host}:{self.rpcbind_port}")
+        self.pm1 = Portmapper(self.host, self.rpcbind_port, True, self.vxi11_port).start()
+        self.pm2 = Portmapper(self.host, self.rpcbind_port, False, self.vxi11_port).start()
         # Create VXI-11 socket
-        self.lxi_socket = self.create_socket(self.host, self.vxi11_port, False)
+        print(f"{self.myname}: Listening to TCP port {self.host}:{self.vxi11_port.value}")
+        self.lxi_socket = self.create_socket(self.host, self.vxi11_port.value, False, self.myname)
 
         # Initialize SCPI command parser
         self.parser = CommandParser(self.awg)
@@ -134,94 +417,20 @@ class AwgServer(object):
 
         # Run the VXI-11 server
         while True:
-            # VXI-11 requests are processed after receiving a valid RPCBIND request.
-            print("\nWaiting for connection request...")
-            if self.portmap_on_udp:
-                res = self.process_rpcbind_request_udp()
-            else:
-                res = self.process_rpcbind_request_tcp()
-            if res != OK:
-                print("Incompatible RPCBIND request.")
-                continue
             # print("Waiting for LXI request.")
-            
             self.process_lxi_requests()
             
             # every request must go to a new socket (as SDS800X-HD requires)
             self.close_lxi_sockets()
-            self.vxi11_port += 1
-            if self.vxi11_port > self.vxi11_portrange_end:
-                self.vxi11_port = self.vxi11_portrange_start
-            print(f"VXI-11 moving to TCP port {self.vxi11_port}")
-            self.lxi_socket = self.create_socket(self.host, self.vxi11_port, False)
+            self.vxi11_port.value += 1
+            if self.vxi11_port.value > self.vxi11_portrange_end:
+                self.vxi11_port.value = self.vxi11_portrange_start
+            print(f"{self.myname}: moving to TCP port {self.vxi11_port.value}")
+            self.lxi_socket = self.create_socket(self.host, self.vxi11_port.value, False, self.myname)
             
         # This code will never be reached
         # Disconnect from the external AWG
         self.signal_gen.connect()
-
-    def process_rpcbind_request_tcp(self):
-        """Replies to RPCBIND/Portmap request and sends VXI-11 port number to the oscilloscope."""
-        # RFC 1057 and RFC 1833 apply here. The scope uses V2, so RFC 1057 suffices.
-
-        connection, address = self.rpcbind_socket.accept()
-        rx_data = connection.recv(128)
-        if len(rx_data) > 4:
-            rx_data = rx_data[0x04:]  # start from XID, as with UDP
-            print("Incoming connection from %s:%s." % (address[0], address[1]))
-            # Validate the request.
-            #  If the request is not GETPORT or does not come from VXI-11 Core (395183),
-            #  we have nothing to do wit it
-            procedure = self.get_procedure(rx_data)
-            if procedure != GET_PORT:
-                return NOT_GET_PORT_ERROR
-            program_id = self.get_program_id(rx_data)
-            if program_id != VXI11_CORE_ID:
-                return NOT_VXI11_ERROR
-            # Generate and send response
-            resp = self.generate_rpcbind_response()
-            xid = self.get_xid(rx_data)
-            resp_data = self.generate_resp_data(xid, resp)
-            connection.send(resp_data)
-        # Close connection and RPCBIND socket.
-        connection.close()
-        return OK
-    
-    def process_rpcbind_request_udp(self):
-        """Replies to RPCBIND/Portmap request and sends VXI-11 port number to the oscilloscope."""
-        # RFC 1057 and RFC 1833 apply here. The scope uses V2, so RFC 1057 suffices.
-        
-        bufferSize = 1024
-        bytesAddressPair = self.rpcbind_socket.recvfrom(bufferSize)
-
-        rx_data = bytesAddressPair[0]
-        address = bytesAddressPair[1]
-
-        if len(rx_data) > 0:
-            print("\nIncoming connection from %s:%s." % (address[0], address[1]))
-            # Validate the request.
-            #  If the request is not GETPORT or does not come from VXI-11 Core (395183),
-            #  we have nothing to do wit it
-            # debug: print(f"Data: [{' '.join(format(x, '02x') for x in rx_data)}]")
-            #  This should be: 
-            #  ....XID.... 00 00 00 00  00 00 00 02 00 01 86 a0 
-            #  00 00 00 02 00 00 00 03  00 00 00 00 00 00 00 00 
-            #  00 00 00 00 00 00 00 00  00 06 07 af 00 00 00 01 
-            #  00 00 00 06 00 00 00 00
-            procedure = self.get_procedure(rx_data)
-            if procedure != GET_PORT:
-                return NOT_GET_PORT_ERROR
-            program_id = self.get_program_id(rx_data)
-            if program_id != VXI11_CORE_ID:
-                return NOT_VXI11_ERROR
-            # Generate and send response
-            resp = self.generate_rpcbind_response()
-            xid = self.get_xid(rx_data)
-            # debug: print(f"XID: [{' '.join(format(x, '02x') for x in xid)}]")
-            resp_data = self.generate_resp_data(xid, resp, True)
-            # debug: print(f"resp_data: [{' '.join(format(x, '02x') for x in resp_data)}]")
-            self.rpcbind_socket.sendto(resp_data, address)
-
-        return OK    
 
     def process_lxi_requests(self):
         connection, address = self.lxi_socket.accept()
@@ -294,7 +503,7 @@ class AwgServer(object):
 
                 # Generate and send response
                 xid = self.get_xid(rx_buf[0x04:])
-                resp_data = self.generate_resp_data(xid, resp)
+                resp_data = self.generate_resp_data(xid, resp, False)
                 connection.send(resp_data)
                 
                 if vxi11_procedure == DESTROY_LINK:
@@ -342,86 +551,9 @@ class AwgServer(object):
             scpi_command = scpi_command.decode('utf-8').strip()
         return (status, vxi11_procedure, scpi_command, cmd_length)
 
-    def get_xid(self, rx_packet):
-        """
-        Extracts XID from the incoming RPC packet.
-        """
-        xid = rx_packet[0x00:0x04]
-        return xid
-    
-    def get_procedure(self, rx_packet):
-        """
-        Extracts procedure from the incoming RPC packet.
-        """
-        return self.bytes_to_uint(rx_packet[0x14:0x18])
-
-    def get_program_id(self, rx_packet):
-        """
-        Extracts program_id from the incoming RPC packet.
-        """
-        return self.bytes_to_uint(rx_packet[0x28:0x2C])
-
-    def generate_resp_data(self, xid, resp, on_udp=False):
-        """
-        Generates the response data to be sent to the oscilloscope.
-        """
-        # Generate RPC header
-        rpc_hdr = self.generate_rpc_header(xid)
-        if on_udp:
-            # Merge all the headers
-            resp_data = rpc_hdr + resp
-        else:
-            # Generate packet size header
-            data_size = len(rpc_hdr) + len(resp)
-            size_hdr = self.generate_packet_size_header(data_size)
-            # Merge all the headers
-            # debug: print(f"size_hdr: [{' '.join(format(x, '02x') for x in size_hdr)}]")
-            # debug: print(f"rpc_hdr: [{' '.join(format(x, '02x') for x in rpc_hdr)}]")
-            # debug: print(f"resp: [{' '.join(format(x, '02x') for x in resp)}]")
-            resp_data = size_hdr + rpc_hdr + resp
-        return resp_data
-
-    def generate_packet_size_header(self, size):
-        """
-        Generates the header containing reply packet size.
-        """
-        # 1... .... .... .... .... .... .... .... = Last Fragment: Yes
-        size = size | 0x80000000
-        # .000 0000 0000 0000 0000 0000 0001 1100 = Fragment Length: 28
-        res = self.uint_to_bytes(size)
-        return res
-
-    def generate_rpc_header(self, xid):
-        """
-        Generates RPC header for replying to oscilloscope's requests.
-        @param xid: XID from the request packet as bytes sequence.
-        """
-
-        hdr = b""
-
-        # XID: 0xXXXXXXXX (4 bytes)
-        hdr += xid
-        # Message Type: Reply (1)
-        hdr += b"\x00\x00\x00\x01"
-        # Reply State: accepted (0)
-        hdr += b"\x00\x00\x00\x00"
-        # Verifier
-        #  Flavor: AUTH_NULL (0)
-        hdr += b"\x00\x00\x00\x00"
-        #  Length: 0
-        hdr += b"\x00\x00\x00\x00"
-        # Accept State: RPC executed successfully (0)
-        hdr += b"\x00\x00\x00\x00"
-        return hdr
-
     # =========================================================================
     #   Response data generators
     # =========================================================================
-
-    def generate_rpcbind_response(self):
-        """Returns VXI-11 port number as response to RPCBIND request."""
-        resp = self.uint_to_bytes(self.vxi11_port)
-        return resp
 
     def generate_lxi_create_link_response(self):
         """Generates reply to VXI-11 CREATE_LINK request."""
@@ -467,52 +599,6 @@ class AwgServer(object):
         resp += b"\x0A\x00\x00"
         return resp
 
-    # =========================================================================
-    #   Helper functions
-    # =========================================================================
-
-    def bytes_to_uint(self, bytes_seq):
-        """
-        Converts a sequence of 4 bytes to 32-bit integer. Byte 0 is MSB.
-        """
-        return int.from_bytes(bytes_seq, "big")
-        # num = ord(bytes_seq[0])
-        # num = num * 0x100 + ord(bytes_seq[1])
-        # num = num * 0x100 + ord(bytes_seq[2])
-        # num = num * 0x100 + ord(bytes_seq[3])
-        # return num
-
-    def uint_to_bytes(self, num):
-        """
-        Converts a 32-bit integer to a sequence of 4 bytes. Byte 0 is MSB.
-        """
-        return num.to_bytes(4, "big")
-        # byte3 = (num / 0x1000000) & 0xFF
-        # byte2 = (num / 0x10000) & 0xFF
-        # byte1 = (num / 0x100) & 0xFF
-        # byte0 = num & 0xFF
-        # bytes_seq = bytearray((byte3, byte2, byte1, byte0))
-        # return bytes_seq
-
-    def print_as_hex(self, buf):
-        """
-        Prints a buffer as a set of hexadecimal numbers.
-        Created for debug purposes.
-        """
-        buf_str = ""
-        for b in buf:
-            buf_str += "0x%X " % ord(b)
-        print(buf_str)
-
-    def close_rpcbind_sockets(self):
-        """
-        Closes RPCBIND socket.
-        """
-        try:
-            self.rpcbind_socket.close()
-        except:
-            pass
-
     def close_lxi_sockets(self):
         """
         Closes VXI-11 socket.
@@ -523,9 +609,12 @@ class AwgServer(object):
             pass
 
     def close_sockets(self):
-        self.close_rpcbind_sockets()
         self.close_lxi_sockets()
-
+        if self.pm1:
+            self.pm1.terminate()
+        if self.pm2:
+            self.pm2.terminate()
+        
     def __del__(self):
         self.close_sockets()
 

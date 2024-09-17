@@ -2,11 +2,15 @@
 
 Bode plot with Siglent oscilloscopes (SDS1000X-E, SDS800X-HD, SDS1000X-HD, and probably others) and a non-siglent AWG.
 
+Can also be used as a regular VXI-11 front-end for the supported AWGs, without the Siglent scope.
+
 ## Overview
 
 At a certain point after getting the SDS1204X-E oscilloscope I started to wonder if it might be possible to use the Bode plot function with a non-Siglent waveform generator. After some hours of researching and reverse engineering I wrote this Python program which is a small server which emulates Siglent arbitrary waveform generator.
 
 The oscilloscope connects using LAN to a PC running this program. The program makes the oscilloscope think that it communicates with a genuine Siglent signal generator. The program extracts the commands sent to the generator, parses them and translates to the command set, which can be understood by the connected to the PC non-Siglent generator.
+
+This tool can also be used to control the supported AWGs via other VISA tools, independently of a Siglent scope. It supports discovery over the network.
 
 The current version of the program was tested under Linux and MacOS only. It will likely work under Windows too, with an up to date python version.
 
@@ -57,7 +61,7 @@ Under Linux, Python ```sockets``` requires elevated privileges, therefore the pr
 
 The program must be run in a command line terminal. The file to be run is ```bode.py```. In order to run it, change the current path to the directory where you downloaded the source code. Then write the following command:
 
-```python bode.py <awg_name> [<port>] [<baud_rate>] [-udp] [-h]```
+```python bode.py <awg_name> [<port>] [<baud_rate>] [-h]```
 
 where
 
@@ -69,8 +73,6 @@ where
 
 The ```dummy``` generator was added for running this program without connecting a signal generator. The program will emulate a Siglent AWG and the oscilloscope will generate a Bode plot but no commands will be sent to the AWG.
 
-Use ```-udp``` if your scope is a SDS800X-HD, or another new Siglent scope.
-
 Use ```-h``` for help text.
 
 If the program starts successfully, you'll see the following output:
@@ -79,54 +81,51 @@ If the program starts successfully, you'll see the following output:
 Initializing AWG...
 AWG: jds6600
 Port: /dev/ttyUSB0
+IDN: jds6600
+AWG initialized.
 Starting AWG server...
-Listening on 0.0.0.0
-RPCBIND on TCP port 111
-VXI-11 on TCP port 9009
-Creating sockets...
-
-Waiting for connection request...
+Portmapper: Listening to UDP and TCP ports on 0.0.0.0:111
+VXI-11: Listening to TCP port 0.0.0.0:9010
 ```
 
 After starting the program, follow the usual procedure of creating Bode plot. After starting the plotting, the program output will be similar to the following:
 
 ```text
-Incoming connection from 192.168.14.27:55916.
+UDPPortmapper: Incoming connection from 192.168.14.27:55916.
+UDPPortmapper: Sending to TCP port 9009
 VXI-11 CREATE_LINK, SCPI command: inst0
 VXI-11 DEVICE_WRITE, SCPI command: IDN-SGLT-PRI?
 VXI-11 DEVICE_READ, SCPI command: None
 VXI-11 DESTROY_LINK, SCPI command: None
 VXI-11 moving to TCP port 9010
-
-Waiting for connection request...
-Incoming connection from 192.168.14.27:48446.
+UDPPortmapper: Incoming connection from 192.168.14.27:48446.
+UDPPortmapper: Sending to TCP port 9010
 VXI-11 CREATE_LINK, SCPI command: inst0
 VXI-11 DEVICE_WRITE, SCPI command: C1:OUTP LOAD,50;BSWV WVTP,SINE,PHSE,0,FRQ,15000,AMP,2,OFST,0;OUTP ON
 VXI-11 DESTROY_LINK, SCPI command: None
 VXI-11 moving to TCP port 9009
-
-Waiting for connection request...
-Incoming connection from 192.168.14.27:50264.
+UDPPortmapper: Incoming connection from 192.168.14.27:50264.
+UDPPortmapper: Sending to TCP port 9009
 VXI-11 CREATE_LINK, SCPI command: inst0
 VXI-11 DEVICE_WRITE, SCPI command: C1:BSWV?
 VXI-11 DEVICE_READ, SCPI command: None
 VXI-11 DESTROY_LINK, SCPI command: None
 VXI-11 moving to TCP port 9010
-
-Waiting for connection request...
-Incoming connection from 192.168.14.27:55976.
+UDPPortmapper: Incoming connection from 192.168.14.27:55976.
+UDPPortmapper: Sending to TCP port 9010
 VXI-11 CREATE_LINK, SCPI command: inst0
 VXI-11 DEVICE_WRITE, SCPI command: C1:BSWV FRQ,10
 VXI-11 DESTROY_LINK, SCPI command: None
 VXI-11 moving to TCP port 9009
-
-Waiting for connection request...
-Incoming connection from 192.168.14.27:48088.
+UDPPortmapper: Incoming connection from 192.168.14.27:48088.
+UDPPortmapper: Sending to TCP port 9009
 VXI-11 CREATE_LINK, SCPI command: inst0
-VXI-11 DEVICE_WRITE, SCPI command: C1:BSWV FRQ,10
+VXI-11 DEVICE_WRITE, SCPI command: C1:BSWV FRQ,20
 VXI-11 DESTROY_LINK, SCPI command: None
 VXI-11 moving to TCP port 9010
 ```
+
+When done, you can stop the process via Ctrl-C.
 
 ## Some possible errors
 
@@ -138,11 +137,11 @@ Many different SCPI dialects exist. If you have an AWG that is not listed but is
 
 ## Changelog
 
-### 2024-09-16
+### 2024-09-17
 
 * new driver for newer fy6900 devices.
 * better serial port handling for some drivers.
-* better VISA compliance.
+* better VISA compliance: no longer a need to specify UDP or not. This version listens on both UDP and TCP and is therefore compatible with most VISA tools and older plus newer Siglent scopes.
 
 ### 2024-09-06
 
