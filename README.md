@@ -141,6 +141,11 @@ If you get an error message with  ```Address already in use. Cannot use ... for 
 
 Many different SCPI dialects exist. If you have an AWG that is not listed but is SCPI compatible, you may try one of the existing SCPI drivers (```dg800``` or ```utg1000x```). If you want to do a quick test, adapt `awg_tests.py` to your device and address, it will test all commands. If your device does not talk one of the existing dialects, you can create a new one easily by using one of the existing drivers as example. Please tell us if you have done so (via github Issue or Pull request), so that we can add the device to the list.
 
+## Using independently from the scope, via VISA
+
+This is possible, but you should set a large timeout on your ```Instrument``` or when using ```open_resource()``` when using serial AWGs. See the example in [```testSCPI.py```](/sds1004x_bode/tests/testSCPI.py)
+
+
 ## Changelog
 
 ### 2024-09-19
