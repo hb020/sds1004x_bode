@@ -22,8 +22,7 @@ if __name__ == '__main__':
 
     for line in lines:
         line = line.strip()
-        print line
+        print(line)
         if line == "":
             continue
         parser.parse_scpi_command(line)
-

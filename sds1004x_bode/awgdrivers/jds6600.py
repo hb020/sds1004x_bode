@@ -37,8 +37,10 @@ class JDS6600(BaseAWG):
     '''
     SHORT_NAME = "jds6600"
 
-    def __init__(self, port, baud_rate=BAUD_RATE, timeout=TIMEOUT):
+    def __init__(self, port: str = "", baud_rate: int = BAUD_RATE, timeout: int = TIMEOUT, log_debug: bool = False):
         """baud_rate parameter is ignored."""
+        super().__init__(log_debug=log_debug)
+        self.printdebug("init")
         self.port = port
         self.ser = None
         self.timeout = timeout
@@ -46,27 +48,28 @@ class JDS6600(BaseAWG):
         self.r_load = [50, 50]
         self.v_out_coeff = [1, 1]
 
-    def connect(self):
+    def _connect(self):
         self.ser = serial.Serial(self.port, BAUD_RATE, BITS, PARITY, STOP_BITS, timeout=self.timeout)
 
     def disconnect(self):
+        self.printdebug("disconnect")
         self.ser.close()
 
-    def send_command(self, cmd):
+    def _send_command(self, cmd):
         cmd = (cmd + EOL).encode()
         self.ser.write(cmd)
         time.sleep(SLEEP_TIME)
 
     def initialize(self):
+        self.printdebug("initialize")
         self.channel_on = [False, False]
-        self.connect()
+        self._connect()
         self.enable_output(None, False)
 
     def get_id(self) -> str:
-        self.send_command(":r01=0.")
+        self._send_command(":r01=0.")
         ans = self.ser.read_until(".\r\n".encode("utf8"), size=None).decode("utf8")
         ans = ans.replace(":ok", "")
-        ans = ans.strip()
         return ans.strip()
 
     def enable_output(self, channel: int = None, on: bool = False):
@@ -81,6 +84,7 @@ class JDS6600(BaseAWG):
         enable outputs of channels 1, 2 and of both accordingly.
 
         """
+        self.printdebug(f"enable_output(channel: {channel}, on:{on})")
         if channel is not None and channel not in CHANNELS:
             raise UnknownChannelError(CHANNELS_ERROR)
 
@@ -92,7 +96,7 @@ class JDS6600(BaseAWG):
         ch1 = "1" if self.channel_on[0] else "0"
         ch2 = "1" if self.channel_on[1] else "0"
         cmd = ":w20=%s,%s." % (ch1, ch2)
-        self.send_command(cmd)
+        self._send_command(cmd)
 
     def set_frequency(self, channel: int, freq: float):
         """
@@ -106,6 +110,7 @@ class JDS6600(BaseAWG):
             :w24=25786,3.
                 sets the output frequency of channel 2 to 25.786mHz.
         """
+        self.printdebug(f"set_frequency(channel: {channel}, freq:{freq})")
         if channel is not None and channel not in CHANNELS:
             raise UnknownChannelError(CHANNELS_ERROR)
 
@@ -115,12 +120,12 @@ class JDS6600(BaseAWG):
         # Channel 1
         if channel in (0, 1) or channel is None:
             cmd = ":w23=%s,0." % freq_str
-            self.send_command(cmd)
+            self._send_command(cmd)
 
         # Channel 2
         if channel in (0, 2) or channel is None:
             cmd = ":w24=%s,0." % freq_str
-            self.send_command(cmd)
+            self._send_command(cmd)
 
     def set_phase(self, channel: int, phase: float):
         """
@@ -137,7 +142,7 @@ class JDS6600(BaseAWG):
             phase += 360
         phase = int(round(phase * 10))
         cmd = ":w31=%s." % (phase)
-        self.send_command(cmd)
+        self._send_command(cmd)
 
     def set_wave_type(self, channel: int, wave_type: int):
         """
@@ -148,6 +153,7 @@ class JDS6600(BaseAWG):
             :w22=0.
         set wave forms of channels 1 and 2 accordingly to sine wave.
         """
+        self.printdebug(f"set_wave_type(channel: {channel}, wavetype:{wave_type})")
         if channel is not None and channel not in CHANNELS:
             raise UnknownChannelError(CHANNELS_ERROR)
         if wave_type not in constants.WAVE_TYPES:
@@ -156,12 +162,12 @@ class JDS6600(BaseAWG):
         # Channel 1
         if channel in (0, 1) or channel is None:
             cmd = ":w21=%s." % wave_type
-            self.send_command(cmd)
+            self._send_command(cmd)
 
         # Channel 2
         if channel in (0, 2) or channel is None:
             cmd = ":w22=%s." % wave_type
-            self.send_command(cmd)
+            self._send_command(cmd)
 
     def set_amplitude(self, channel: int, amplitude: float):
         """
@@ -172,6 +178,7 @@ class JDS6600(BaseAWG):
             :w26=30.
         set amplitudes of channel 1 and channel 2 accordingly to 0.03V.
         """
+        self.printdebug(f"set_amplitude(channel: {channel}, amplitude:{amplitude})")
         if channel is not None and channel not in CHANNELS:
             raise UnknownChannelError(CHANNELS_ERROR)
 
@@ -187,12 +194,12 @@ class JDS6600(BaseAWG):
         # Channel 1
         if channel in (0, 1) or channel is None:
             cmd = ":w25=%s." % amp_str
-            self.send_command(cmd)
+            self._send_command(cmd)
 
         # Channel 2
         if channel in (0, 2) or channel is None:
             cmd = ":w26=%s." % amp_str
-            self.send_command(cmd)
+            self._send_command(cmd)
 
     def set_offset(self, channel: int, offset: float):
         """
@@ -206,6 +213,7 @@ class JDS6600(BaseAWG):
             :w28=1.
                 sets the offset of channel 2 to -9.99V.
         """
+        self.printdebug(f"set_offset(channel: {channel}, offset:{offset})")
         if channel is not None and channel not in CHANNELS:
             raise UnknownChannelError(CHANNELS_ERROR)
 
@@ -217,17 +225,18 @@ class JDS6600(BaseAWG):
         # Channel 1
         if channel in (0, 1) or channel is None:
             cmd = ":w27=%s." % offset_val
-            self.send_command(cmd)
+            self._send_command(cmd)
 
         # Channel 2
         if channel in (0, 2) or channel is None:
             cmd = ":w28=%s." % offset_val
-            self.send_command(cmd)
+            self._send_command(cmd)
 
     def set_load_impedance(self, channel: int, z: float):
         """
         Sets load impedance connected to each channel. Default value is 50 Ohm.
         """
+        self.printdebug(f"set_load_impedance(channel: {channel}, impedance:{z})")
         if channel is not None and channel not in CHANNELS:
             raise UnknownChannelError(CHANNELS_ERROR)
 

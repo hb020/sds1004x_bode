@@ -24,7 +24,10 @@ AWG_ID = "fy"
 AWG_OUTPUT_IMPEDANCE = 50.0
 MAX_READ_SIZE = 256
 RETRY_COUNT = 2
-VERBOSE = False  # Set to True for protocol debugging 
+MAX_RETRIES = 5
+
+BAUD_RATE = 115200
+TIMEOUT = 5
 
 
 class FygenAWG(BaseAWG):
@@ -32,29 +35,26 @@ class FygenAWG(BaseAWG):
 
     SHORT_NAME = "fy"
 
-    def __init__(self, port, baud_rate=115200, timeout=5):
+    def __init__(self, port: str = "", baud_rate: int = BAUD_RATE, timeout: int = TIMEOUT, log_debug: bool = False):
         """baud_rate parameter is ignored."""
+        super().__init__(log_debug=log_debug)
+        self.printdebug("init")
         self.fy = None
-        self.port = None
-        self.serial_path = port
+        self.ser = None
+        self.port = port
         self.timeout = timeout
         # None -> Hi-Z
         self.load_impedance = {
             1: None,
             2: None,
         }
-        self.verbose = VERBOSE
-        
-    def debug(self, msg, *args):
-        if self.verbose:
-            print(msg % args)
 
-    def connect(self):
-        if self.port:
+    def _connect(self):
+        if self.ser:
             return
 
-        self.port = serial.Serial(
-            port=self.serial_path,
+        self.ser = serial.Serial(
+            port=self.port,
             baudrate=115200,
             bytesize=serial.EIGHTBITS,
             parity=serial.PARITY_NONE,
@@ -64,25 +64,28 @@ class FygenAWG(BaseAWG):
             xonxoff=False,
             timeout=self.timeout)
 
-        self.debug("Connected to %s", self.serial_path)
-        self.port.reset_output_buffer()
-        self.port.reset_input_buffer()
+        self.printdebug(f"Connected to {self.port}")
+        self.ser.reset_output_buffer()
+        self.ser.reset_input_buffer()
 
     def disconnect(self):
-        if self.port:
-            self.debug("Disconnected from %s", self.serial_path)
-            self.port.close()
-            self.port = None
+        self.printdebug("disconnect")
+        if self.ser:
+            self.printdebug("Disconnected from {self.port}")
+            self.ser.close()
+            self.ser = None
 
     def initialize(self):
-        self.connect()
+        self._connect()
         self.enable_output(0, False)
 
     def get_id(self) -> str:
+        # TODO: use command "UID"
         return AWG_ID
 
     def enable_output(self, channel: int, on: bool):
         """Turns a channel on (True) or off (False)."""
+        self.printdebug(f"enable_output(channel: {channel}, on:{on})")
         self._retry(
             channel,
             "N",
@@ -93,6 +96,7 @@ class FygenAWG(BaseAWG):
         """Sets frequency for a channel.
           freq is a floating point value in Hz.
         """
+        self.printdebug(f"set_frequency(channel: {channel}, freq:{freq})")
         uhz = int(freq * 1000000.0)
 
         # AWG Bug: With the FY2300 and some values of frequency (for example
@@ -104,7 +108,7 @@ class FygenAWG(BaseAWG):
         def match_hz_only(match, got):
             if '.' in got and match == got[:got.index('.')]:
                 return True
-            self.debug('set_frequency mismatch (looking at Hz value only)')
+            self.printdebug('set_frequency mismatch (looking at Hz value only)')
             return False
 
         self._retry(
@@ -115,27 +119,29 @@ class FygenAWG(BaseAWG):
             match_fn=match_hz_only)
 
     def set_phase(self, channel: int, phase: float):
-        del channel  # This parameter is ignored, always set phase on channel 2
         """Sets the phase of a channel in degrees."""
+        self.printdebug(f"set_phase(channel: {channel}, phase: {phase}), but forced on channel 2")
+        channel = 2  # This parameter is ignored, always set phase on channel 2 (not sure why)
         self._retry(
-            2,  # always channel 2 (not sure why)
+            channel,
             "P",
             "%.3f" % phase,
             "%u" % (phase * 1000))
 
     def set_wave_type(self, channel: int, wave_type: int):
         """Sets a channel to a sin wave."""
-        del wave_type  # This parameter is ignored, always set a sin wave
+        self.printdebug(f"set_wave_type(channel: {channel}, wavetype:{wave_type}), but forcing sine wave")
         self._retry(channel, "W", "0", "0")
 
-    def set_amplitude(self, channel: int, amp):
+    def set_amplitude(self, channel: int, amplitude: float):
         """Sets a channel amplitude in volts.
           Load impedeance for the channel is taken into account
           when calculating the amplitude.  For example, if the load
           impedance is 50 ohms and amp=50 ohms, the actual voltage
           set is 1 * (50 + 50) / 50 = 2V.
         """
-        volts = round(self._apply_load_impedance(channel, amp), 4)
+        self.printdebug(f"set_amplitude(channel: {channel}, amplitude:{amplitude})")
+        volts = round(self._apply_load_impedance(channel, amplitude), 4)
         self._retry(
             channel,
             "A",
@@ -146,6 +152,7 @@ class FygenAWG(BaseAWG):
         """Sets the voltage offset for a channel.
           offset is a floating point number.
         """
+        self.printdebug(f"set_offset(channel: {channel}, offset:{offset})")
         # Factor in load impedance.
         offset = self._apply_load_impedance(channel, offset)
 
@@ -163,6 +170,7 @@ class FygenAWG(BaseAWG):
 
     def set_load_impedance(self, channel: int, z: float):
         """Sets the load impedance for a channel."""
+        self.printdebug(f"set_load_impedance(channel: {channel}, impedance:{z})")
         maxz = 10000000.0
         if z > maxz:
             z = None  # Hi-z
@@ -178,24 +186,24 @@ class FygenAWG(BaseAWG):
 
     def _recv(self, command):
         """Waits for device."""
-        response = self.port.read_until(size=MAX_READ_SIZE).decode("utf8")
-        self.debug("%s -> %s", command.strip(), response.strip())
+        response = self.ser.read_until(size=MAX_READ_SIZE).decode("utf8")
+        self.printdebug(f"{command.strip()} -> {response.strip()}")
         return response
 
-    def _send(self, command, retry_count=5):
+    def _send(self, command, retry_count=MAX_RETRIES):
         """Sends a low-level command. Returns the response."""
-        self.debug("send (attempt %u/5) -> %s", 6 - retry_count, command)
+        self.printdebug(f"send (attempt {MAX_RETRIES + 1 - retry_count}/{MAX_RETRIES}) -> {command}")
 
         data = command + "\n"
         data = data.encode()
-        self.port.reset_output_buffer()
-        self.port.reset_input_buffer()
-        self.port.write(data)
-        self.port.flush()
+        self.ser.reset_output_buffer()
+        self.ser.reset_input_buffer()
+        self.ser.write(data)
+        self.ser.flush()
 
         response = self._recv(command)
 
-        if not response and retry_count > 0:
+        if not response and retry_count > 1:
             # sometime the siggen answers queries with nothing.  Wait a bit,
             # then try again
             time.sleep(0.1)
@@ -222,15 +230,15 @@ class FygenAWG(BaseAWG):
                 return match == got
 
         if match_fn(match, self._send("R" + channel + command)):
-            self.debug("already set %s", match)
+            self.printdebug(f"already set {match}")
             return
 
         for _ in range(RETRY_COUNT):
             self._send("W" + channel + command + value)
             if match_fn(match, self._send("R" + channel + command)):
-                self.debug("matched %s", match)
+                self.printdebug(f"matched {match}")
                 return
-            self.debug("mismatched %s", match)
+            self.printdebug(f"mismatched {match}")
 
         # Print a warning.  This is not an error because the AWG read bugs
         # worked-around in this module could vary by AWG model number or

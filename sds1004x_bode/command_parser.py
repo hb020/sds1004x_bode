@@ -33,10 +33,10 @@ class CommandParser(object):
 
         If the command is a query to the AWG, it is ignored.
         """
+        print(f"> {line}")
         if line.endswith("?"):
             return
 
-        print(line)
         channel = int(line[1])
 
         commands = line[3:].split(';')

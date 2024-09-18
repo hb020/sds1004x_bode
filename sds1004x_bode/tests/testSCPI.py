@@ -11,8 +11,13 @@ if __name__ == '__main__':
     print("VISA Resources found: ", end='')
     print(rm.list_resources())
     if args.port:
-        inst = rm.open_resource(args.port)
-        msgs = ["*IDN?", "IDN-SGLT-PRI?", "C1:OUTP LOAD,50;BSWV WVTP,SINE,PHSE,0,FRQ,50000,AMP,2.1,OFST,0;OUTP ON"]
+        inst = rm.open_resource(args.port, timeout=10000)  # You need a large timeout when using serial AWGs
+        msgs = ["*IDN?", 
+                "IDN-SGLT-PRI?", 
+                "C1:OUTP LOAD,50;BSWV WVTP,SINE,PHSE,0,FRQ,50000,AMP,2.1,OFST,0;OUTP ON",
+                "C1:BSWV?",
+                "C1:BSWV FRQ,10"
+                ]
         for m in msgs:
             if m.endswith("?"):
                 print(f"Query \"{m}\" reply: ", end='')

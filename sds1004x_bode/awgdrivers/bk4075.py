@@ -50,27 +50,32 @@ class BK4075(BaseAWG):
     '''
     SHORT_NAME = "bk4075"
 
-    def __init__(self, port, baud_rate=DEFAULT_BAUD_RATE, timeout=TIMEOUT):
+    def __init__(self, port: str = "", baud_rate: int = DEFAULT_BAUD_RATE, timeout: int = TIMEOUT, log_debug: bool = False):
+        super().__init__(log_debug=log_debug)
+        self.printdebug("init")
         if baud_rate not in BAUD_RATES:
             raise ValueError("Baud rate must be 2400, 4800, 9600 or 19200 bps.")
+        self.ser = None
         self.port = port
         self.baud_rate = baud_rate
         self.timeout = timeout
 
-    def connect(self):
+    def _connect(self):
         self.ser = serial.Serial(self.port, self.baud_rate, BITS, PARITY, STOP_BITS, timeout=self.timeout)
 
     def disconnect(self):
+        self.printdebug("disconnect")
         self.ser.close()
 
-    def send_command(self, cmd):
+    def _send_command(self, cmd):
         cmd = (cmd + EOL).encode()        
         self.ser.write(cmd)
         time.sleep(SLEEP_TIME)
 
     def initialize(self):
-        self.connect()
-        self.send_command("SYST:SCR ON")
+        self.printdebug("initialize")
+        self._connect()
+        self._send_command("SYST:SCR ON")
         self.r_load = DEFAULT_LOAD
         self.v_out_coeff = 1.0
         self.output_on = DEFAULT_OUTPUT_ON
@@ -78,7 +83,7 @@ class BK4075(BaseAWG):
 
     def get_id(self) -> str:
         self.ser.reset_input_buffer()
-        self.send_command("*IDN?")
+        self._send_command("*IDN?")
         time.sleep(SLEEP_TIME)
         ans = self.ser.read_until(EOL.encode("utf8"), size=None).decode("utf8")
         return ans.strip()
@@ -92,15 +97,16 @@ class BK4075(BaseAWG):
             :OUTP:STAT ON
             :OUTP OFF
         """
+        self.printdebug(f"enable_output(channel: {channel}, on:{on})")
         if channel is not None and channel not in CHANNELS:
             raise UnknownChannelError(CHANNELS_ERROR)
 
         self.output_on = on
 
         if self.output_on:
-            self.send_command(":OUTP:STAT ON")
+            self._send_command(":OUTP:STAT ON")
         else:
-            self.send_command(":OUTP:STAT OFF")
+            self._send_command(":OUTP:STAT OFF")
 
     def set_frequency(self, channel: int, freq: float):
         """
@@ -114,17 +120,19 @@ class BK4075(BaseAWG):
             :FREQ MAXIMUM
             :FREQ MIN
         """
+        self.printdebug(f"set_frequency(channel: {channel}, freq:{freq})")
         if channel is not None and channel not in CHANNELS:
             raise UnknownChannelError(CHANNELS_ERROR)
 
         freq_str = "%.10f" % freq
         cmd = ":FREQ %s" % (freq_str)
-        self.send_command(cmd)
+        self._send_command(cmd)
 
     def set_phase(self, channel: int, phase: float):
         """
         BK4075 does not require setting phase.
         """
+        self.printdebug(f"set_phase(channel: {channel}, phase: {phase}): ignored")
         pass
 
     def set_wave_type(self, channel: int, wave_type: int):
@@ -140,13 +148,14 @@ class BK4075(BaseAWG):
             :FUNC SIN
             :FUNC ARB
         """
+        self.printdebug(f"set_wave_type(channel: {channel}, wavetype:{wave_type})")
         if channel is not None and channel not in CHANNELS:
             raise UnknownChannelError(CHANNELS_ERROR)
         if wave_type not in constants.WAVE_TYPES:
             raise ValueError("Incorrect wave type.")
 
         cmd = WAVEFORM_COMMANDS[wave_type]
-        self.send_command(cmd)
+        self._send_command(cmd)
 
     def set_amplitude(self, channel: int, amplitude: float):
         """
@@ -160,6 +169,7 @@ class BK4075(BaseAWG):
             :VOLT:AMPL 2.5V
             :VOLT:AMPL MAX
         """
+        self.printdebug(f"set_amplitude(channel: {channel}, amplitude:{amplitude})")
         if channel is not None and channel not in CHANNELS:
             raise UnknownChannelError(CHANNELS_ERROR)
 
@@ -168,7 +178,7 @@ class BK4075(BaseAWG):
 
         amp_str = "%.3f" % amplitude
         cmd = ":VOLT:AMPL %s" % (amp_str)
-        self.send_command(cmd)
+        self._send_command(cmd)
 
     def set_offset(self, channel: int, offset: float):
         """
@@ -182,6 +192,7 @@ class BK4075(BaseAWG):
             :VOLT:OFFS 2.5V
             :VOLT:OFFS MAX
         """
+        self.printdebug(f"set_offset(channel: {channel}, offset:{offset})")
         if channel is not None and channel not in CHANNELS:
             raise UnknownChannelError(CHANNELS_ERROR)
 
@@ -189,12 +200,13 @@ class BK4075(BaseAWG):
         offset = offset * self.v_out_coeff
 
         cmd = ":VOLT:OFFS %s" % (offset)
-        self.send_command(cmd)
+        self._send_command(cmd)
 
     def set_load_impedance(self, channel: int, z: float):
         """
         Sets load impedance connected to each channel. Default value is 50 Ohms.
         """
+        self.printdebug(f"set_load_impedance(channel: {channel}, impedance:{z})")
         if channel is not None and channel not in CHANNELS:
             raise UnknownChannelError(CHANNELS_ERROR)
 

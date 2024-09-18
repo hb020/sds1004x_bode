@@ -43,26 +43,29 @@ class AD9910(BaseAWG):
     '''
     SHORT_NAME = "ad9910"
 
-    def __init__(self, port, baud_rate=BAUD_RATE, timeout=TIMEOUT):
+    def __init__(self, port: str = "", baud_rate: int = BAUD_RATE, timeout: int = TIMEOUT, log_debug: bool = False):        
         """baud_rate parameter is ignored."""
+        super().__init__(log_debug=log_debug)
+        self.printdebug("init")
+        self.ser = None
         self.port = port
         self.timeout = timeout
 
-    def connect(self):
+    def _connect(self):
         self.ser = serial.Serial(self.port, BAUD_RATE, BITS, PARITY, STOP_BITS, timeout=self.timeout)
 
     def disconnect(self):
+        self.printdebug("disconnect")
         self.ser.close()
 
-    def send_command(self, cmd):
+    def _send_command(self, cmd):
         self.ser.write(cmd)
         self.ser.write(EOL)
         time.sleep(SLEEP_TIME)
 
     def initialize(self):
-        self.connect()
-        self.r_load = DEFAULT_LOAD
-        self.v_out_coeff = 1.0
+        self.printdebug("initialize")
+        self._connect()
         self.output_on = DEFAULT_OUTPUT_ON
         self.enable_output(1, self.output_on)
 
@@ -73,67 +76,58 @@ class AD9910(BaseAWG):
         """
         Turns the output on or off.
         """
+        self.printdebug(f"enable_output(channel: {channel}, on:{on})")
         if channel is not None and channel not in CHANNELS:
             raise UnknownChannelError(CHANNELS_ERROR)
 
         self.output_on = on
 
         if self.output_on:
-            self.send_command(b"E")
+            self._send_command(b"E")
         else:
-            self.send_command(b"D")
+            self._send_command(b"D")
 
     def set_frequency(self, channel: int, freq: float):
         """
         Sets output frequency.
         """
+        self.printdebug(f"set_frequency(channel: {channel}, freq:{freq})")
         if channel is not None and channel not in CHANNELS:
             raise UnknownChannelError(CHANNELS_ERROR)
 
         freq_str = "%.10f" % freq
         cmd = "F %s" % (freq_str)
-        print(cmd)
-        self.send_command(cmd.encode('utf-8'))
+        self._send_command(cmd.encode('utf-8'))
 
     def set_phase(self, channel: int, phase: float):
         """
         AD9910 does not require setting phase.
         """
-        pass
+        self.printdebug(f"set_phase(channel: {channel}, phase: {phase}): ignored")
 
     def set_wave_type(self, channel: int, wave_type: int):
         """
         Sets the output wave type.
         """
-        pass
+        self.printdebug(f"set_wave_type(channel: {channel}, wavetype:{wave_type}): ignored")
 
     def set_amplitude(self, channel: int, amplitude: float):
         """
         Sets output amplitude.
         """
-
-        if channel is not None and channel not in CHANNELS:
-            raise UnknownChannelError(CHANNELS_ERROR)
-
-        pass
+        self.printdebug(f"set_amplitude(channel: {channel}, amplitude:{amplitude}): ignored")
 
     def set_offset(self, channel: int, offset: float):
         """
         Sets DC offset of the output.
         """
-        if channel is not None and channel not in CHANNELS:
-            raise UnknownChannelError(CHANNELS_ERROR)
-
-        pass
+        self.printdebug(f"set_offset(channel: {channel}, offset:{offset}): ignored")
 
     def set_load_impedance(self, channel: int, z: float):
         """
-        Sets load impedance connected to each channel. Default value is 50 Ohms.
+        Sets load impedance connected to each channel. 
         """
-        if channel is not None and channel not in CHANNELS:
-            raise UnknownChannelError(CHANNELS_ERROR)
-
-        self.r_load = z
+        self.printdebug(f"set_load_impedance(channel: {channel}, impedance:{z}): ignored")
 
 
 if __name__ == '__main__':

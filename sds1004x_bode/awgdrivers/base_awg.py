@@ -11,11 +11,13 @@ class BaseAWG(object):
     '''
     SHORT_NAME = "base_awg"
 
-    def __init__(self, *args):
-        pass
-
-    def connect(self):
-        raise NotImplementedError()
+    def __init__(self, port: str = "", baud_rate: int = 115200, timeout: int = 5, log_debug: bool = False):
+        self.log_debug = log_debug
+        
+    def printdebug(self, msg: str):
+        if self.log_debug:
+            print(f"{self.__class__.SHORT_NAME}: {msg}")
+            # print(f"{self.__class__.__name__}: {msg}")
 
     def disconnect(self):
         raise NotImplementedError()

@@ -37,8 +37,10 @@ class FY6600(BaseAWG):
     '''
     SHORT_NAME = "fy6600"
 
-    def __init__(self, port, baud_rate=BAUD_RATE, timeout=TIMEOUT):
+    def __init__(self, port: str = "", baud_rate: int = BAUD_RATE, timeout: int = TIMEOUT, log_debug: bool = False):
         """baud_rate parameter is ignored."""
+        super().__init__(log_debug=log_debug)
+        self.printdebug("init")
         self.port = port
         self.ser = None
         self.timeout = timeout
@@ -46,26 +48,28 @@ class FY6600(BaseAWG):
         self.r_load = [50, 50]
         self.v_out_coeff = [1, 1]
 
-    def connect(self):
+    def _connect(self):
         self.ser = serial.Serial(self.port, BAUD_RATE, BITS, PARITY, STOP_BITS, timeout=self.timeout)
 
     def disconnect(self):
+        self.printdebug("disconnect")
         self.ser.close()
 
-    def send_command(self, cmd):
+    def _send_command(self, cmd):
         cmd = (cmd + EOL).encode()
         self.ser.write(cmd)
         time.sleep(SLEEP_TIME)
 
     def initialize(self):
+        self.printdebug("initialize")
         self.channel_on = [False, False]
-        self.connect()
+        self._connect()
         self.enable_output(None, False)
 
     def get_id(self) -> str:
-        self.send_command("UID")
+        self._send_command("UID")
         ans = self.ser.read_until("\r\n".encode("utf8"), size=None).decode("utf8")
-        return ans
+        return ans.strip()
 
     def enable_output(self, channel: int = None, on: bool = False):
         """
@@ -80,6 +84,7 @@ class FY6600(BaseAWG):
 
         Separate commands are thus needed to set the channels for the FY6600.
         """
+        self.printdebug(f"enable_output(channel: {channel}, on:{on})")
         if channel is not None and channel not in CHANNELS:
             raise UnknownChannelError(CHANNELS_ERROR)
 
@@ -93,9 +98,9 @@ class FY6600(BaseAWG):
 
         # The fy6600 uses separate commands to enable each channel.
         cmd = "WMN%s" % (ch1)
-        self.send_command(cmd)
+        self._send_command(cmd)
         cmd = "WFN%s" % (ch2)
-        self.send_command(cmd)
+        self._send_command(cmd)
 
     def set_frequency(self, channel: int, freq: float):
         """
@@ -108,7 +113,7 @@ class FY6600(BaseAWG):
             WFF00000000000001 equals 1 uHz on channel 2
             and so on.
         """
-
+        self.printdebug(f"set_frequency(channel: {channel}, freq:{freq})")
         if channel is not None and channel not in CHANNELS:
             raise UnknownChannelError(CHANNELS_ERROR)
 
@@ -119,12 +124,12 @@ class FY6600(BaseAWG):
         # Channel 1
         if channel in (0, 1) or channel is None:
             cmd = "WMF%s" % freq_str
-            self.send_command(cmd)
+            self._send_command(cmd)
 
         # Channel 2
         if channel in (0, 2):
             cmd = "WFF%s" % freq_str
-            self.send_command(cmd)
+            self._send_command(cmd)
 
     def set_phase(self, channel: int, phase: float):
         """
@@ -135,11 +140,12 @@ class FY6600(BaseAWG):
             WMP100.0 is 100.0 degrees on Channel 1
             WFP4.9 is 4.9 degrees on Channel 2. We are only setting phase on channel 2 here.
         """
+        self.printdebug(f"set_phase(channel: {channel}, phase: {phase}), but forced on channel 2")
         if phase < 0:
             phase += 360
 
         cmd = "WFP%s" % (phase)
-        self.send_command(cmd)
+        self._send_command(cmd)
 
     def set_wave_type(self, channel: int, wave_type: int):
         """
@@ -149,7 +155,8 @@ class FY6600(BaseAWG):
             WMW00 for Sine wave channel 1
             WFW00 for Sine wave channel 2
         Both commands are "hard-coded".
-       """
+        """
+        self.printdebug(f"set_wave_type(channel: {channel}, wavetype:{wave_type}), but forcing sine wave")
         if channel is not None and channel not in CHANNELS:
             raise UnknownChannelError(CHANNELS_ERROR)
         if wave_type not in constants.WAVE_TYPES:
@@ -158,12 +165,12 @@ class FY6600(BaseAWG):
         # Channel 1
         if channel in (0, 1) or channel is None:
             cmd = "WMW00"
-            self.send_command(cmd)
+            self._send_command(cmd)
 
         # Channel 2
         if channel in (0, 2) or channel is None:
             cmd = "WFW00"
-            self.send_command(cmd)
+            self._send_command(cmd)
 
     def set_amplitude(self, channel: int, amplitude: float):
         """
@@ -173,6 +180,7 @@ class FY6600(BaseAWG):
             WMA0.44 for 0.44 volts Channel 1
             WFA9.87 for 9.87 volts Channel 2
         """
+        self.printdebug(f"set_amplitude(channel: {channel}, amplitude:{amplitude})")
         if channel is not None and channel not in CHANNELS:
             raise UnknownChannelError(CHANNELS_ERROR)
 
@@ -186,12 +194,12 @@ class FY6600(BaseAWG):
         # Channel 1
         if channel in (0, 1) or channel is None:
             cmd = "WMA%s" % amp_str
-            self.send_command(cmd)
+            self._send_command(cmd)
 
         # Channel 2
         if channel in (0, 2) or channel is None:
             cmd = "WFA%s" % amp_str
-            self.send_command(cmd)
+            self._send_command(cmd)
 
     def set_offset(self, channel: int, offset: float):
         """
@@ -201,6 +209,7 @@ class FY6600(BaseAWG):
         WMO0.33 sets channel 1 offset to 0.33 volts
         WFO-3.33sets channel 2 offset to -3.33 volts
         """
+        self.printdebug(f"set_offset(channel: {channel}, offset:{offset})")
         if channel is not None and channel not in CHANNELS:
             raise UnknownChannelError(CHANNELS_ERROR)
         # Adjust the offset to the defined load impedance
@@ -209,17 +218,18 @@ class FY6600(BaseAWG):
         # Channel 1
         if channel in (0, 1) or channel is None:
             cmd = "WMO%s" % offset
-            self.send_command(cmd)
+            self._send_command(cmd)
 
         # Channel 2
         if channel in (0, 2) or channel is None:
             cmd = "WFO%s" % offset
-            self.send_command(cmd)
+            self._send_command(cmd)
 
     def set_load_impedance(self, channel: int, z: float):
         """
         Sets load impedance connected to each channel. Default value is 50 Ohm.
         """
+        self.printdebug(f"set_load_impedance(channel: {channel}, impedance:{z})")
         if channel is not None and channel not in CHANNELS:
             raise UnknownChannelError(CHANNELS_ERROR)
 

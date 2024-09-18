@@ -7,12 +7,12 @@ Created on June 1, 2018
 '''
 
 # stuff needed to get the modules from the parent directory
-import sys
-sys.path.insert(0, '..')
+# import sys
+# sys.path.insert(0, '..')
 
-from awgdrivers.exceptions import UnknownChannelError
-from awgdrivers import constants
-from awg_factory import awg_factory
+from ..awgdrivers.exceptions import UnknownChannelError
+from ..awgdrivers import constants
+from ..awg_factory import awg_factory
 
 # Port settings constants
 TIMEOUT = 5
@@ -51,7 +51,7 @@ if __name__ == '__main__':
     
     awg_class = awg_factory.get_class_by_name(awg_name)
 
-    awg = awg_class(port, baud, TIMEOUT)
+    awg = awg_class(port=port, baudrate=baud, timeout=TIMEOUT, log_debug=True)
     awg.initialize()
 
     # Get AWG id

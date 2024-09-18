@@ -61,7 +61,7 @@ Under Linux, Python ```sockets``` requires elevated privileges, therefore the pr
 
 The program must be run in a command line terminal. The file to be run is ```bode.py```. In order to run it, change the current path to the directory where you downloaded the source code. Then write the following command:
 
-```python bode.py <awg_name> [<port>] [<baud_rate>] [-h]```
+```python bode.py <awg_name> [<port>] [<baud_rate>] [-h] [-v[v[v]]]```
 
 where
 
@@ -75,7 +75,9 @@ The ```dummy``` generator was added for running this program without connecting 
 
 Use ```-h``` for help text.
 
-If the program starts successfully, you'll see the following output:
+Use ```-v``` or ```-vv``` or ```-vvv``` for logging verbosity. The first logs the driver info, the next also logs VXI-11 info, the last also logs port mapper info. By default, only the startup phase and the incoming commands are logged.
+
+If the program starts successfully, and with ```-vvv```, you'll see the following output:
 
 ```text
 Initializing AWG...
@@ -88,7 +90,7 @@ Portmapper: Listening to UDP and TCP ports on 0.0.0.0:111
 VXI-11: Listening to TCP port 0.0.0.0:9010
 ```
 
-After starting the program, follow the usual procedure of creating Bode plot. After starting the plotting, the program output will be similar to the following:
+After starting the program, follow the usual procedure of creating Bode plot. After starting the plotting, the program output will be similar to the following (when using ```-vvv```):
 
 ```text
 UDPPortmapper: Incoming connection from 192.168.14.27:55916.
@@ -102,12 +104,14 @@ UDPPortmapper: Incoming connection from 192.168.14.27:48446.
 UDPPortmapper: Sending to TCP port 9010
 VXI-11 CREATE_LINK, SCPI command: inst0
 VXI-11 DEVICE_WRITE, SCPI command: C1:OUTP LOAD,50;BSWV WVTP,SINE,PHSE,0,FRQ,15000,AMP,2,OFST,0;OUTP ON
+> C1:OUTP LOAD,50;BSWV WVTP,SINE,PHSE,0,FRQ,15000,AMP,2,OFST,0;OUTP ON
 VXI-11 DESTROY_LINK, SCPI command: None
 VXI-11 moving to TCP port 9009
 UDPPortmapper: Incoming connection from 192.168.14.27:50264.
 UDPPortmapper: Sending to TCP port 9009
 VXI-11 CREATE_LINK, SCPI command: inst0
 VXI-11 DEVICE_WRITE, SCPI command: C1:BSWV?
+> C1:BSWV?
 VXI-11 DEVICE_READ, SCPI command: None
 VXI-11 DESTROY_LINK, SCPI command: None
 VXI-11 moving to TCP port 9010
@@ -115,12 +119,14 @@ UDPPortmapper: Incoming connection from 192.168.14.27:55976.
 UDPPortmapper: Sending to TCP port 9010
 VXI-11 CREATE_LINK, SCPI command: inst0
 VXI-11 DEVICE_WRITE, SCPI command: C1:BSWV FRQ,10
+> C1:BSWV FRQ,10
 VXI-11 DESTROY_LINK, SCPI command: None
 VXI-11 moving to TCP port 9009
 UDPPortmapper: Incoming connection from 192.168.14.27:48088.
 UDPPortmapper: Sending to TCP port 9009
 VXI-11 CREATE_LINK, SCPI command: inst0
 VXI-11 DEVICE_WRITE, SCPI command: C1:BSWV FRQ,20
+> C1:BSWV FRQ,20
 VXI-11 DESTROY_LINK, SCPI command: None
 VXI-11 moving to TCP port 9010
 ```
@@ -137,11 +143,12 @@ Many different SCPI dialects exist. If you have an AWG that is not listed but is
 
 ## Changelog
 
-### 2024-09-17
+### 2024-09-19
 
 * new driver for newer fy6900 devices.
 * better serial port handling for some drivers.
 * better VISA compliance: no longer a need to specify UDP or not. This version listens on both UDP and TCP and is therefore compatible with most VISA tools and older plus newer Siglent scopes.
+* better logging handling, now available in 4 verbosity levels
 
 ### 2024-09-06
 

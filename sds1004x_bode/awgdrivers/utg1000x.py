@@ -11,8 +11,6 @@ from .exceptions import UnknownChannelError
 
 TIMEOUT = 5
 
-DEBUG_OUT = False
-
 CHANNELS = (0, 1, 2)
 MYNAME = "UTG1000x"
 CHANNELS_ERROR = f"{MYNAME} has only 2 channels."
@@ -33,11 +31,12 @@ class UTG1000x(BaseAWG):
     UTG1000x waveform generator driver.
     '''
 
-    SHORT_NAME = MYNAME.lower()
+    SHORT_NAME = "utg1000x"
 
-    def __init__(self, port, ignore=None, timeout=TIMEOUT):
-        if DEBUG_OUT:
-            print(f"{MYNAME}: init")
+    def __init__(self, port: str = "", baud_rate: int = None, timeout: int = TIMEOUT, log_debug: bool = False):
+        """baud_rate parameter is ignored."""
+        super().__init__(log_debug=log_debug)
+        self.printdebug("init")
         self.port = port
         self.rm = None
         self.m = None
@@ -48,8 +47,7 @@ class UTG1000x(BaseAWG):
 
     def _send_command(self, cmd):
         # local function to send a command and check for errors
-        if DEBUG_OUT:
-            print(f"{MYNAME}: send command \"{cmd}\"")
+        self.printdebug(f"send command \"{cmd}\"")
         self.m.write(cmd)
         r = self.m.query(":SYSTem:ERRor?")
         if r.startswith("0,"):
@@ -59,16 +57,13 @@ class UTG1000x(BaseAWG):
             # raise some error maybe
             return False
 
-    def connect(self):
-        if DEBUG_OUT:
-            print(f"{MYNAME}: connect")
+    def _connect(self):
         self.rm = visa.ResourceManager()
         self.m = self.rm.open_resource(self.port)
         self.m.timeout = self.timeout * 1000
 
     def disconnect(self):
-        if DEBUG_OUT:
-            print(f"{MYNAME}: disconnect")
+        self.printdebug("disconnect")
         if self.m is not None:
             self.enable_output(0, False)
             self.m.close()
@@ -78,9 +73,8 @@ class UTG1000x(BaseAWG):
             self.rm = None
 
     def initialize(self):
-        if DEBUG_OUT:
-            print(f"{MYNAME}: initialize")
-        self.connect()
+        self.printdebug("initialize")
+        self._connect()
         self.m.write("*CLS")
         self.m.write("*RST")
 
@@ -89,8 +83,7 @@ class UTG1000x(BaseAWG):
         return ans.strip()
 
     def enable_output(self, channel: int, on: bool):
-        if DEBUG_OUT:
-            print(f"{MYNAME}: enable_output(channel: {channel}, on:{on})")
+        self.printdebug(f"enable_output(channel: {channel}, on:{on})")
 
         if channel is not None and channel not in CHANNELS:
             raise UnknownChannelError(CHANNELS_ERROR)
@@ -103,8 +96,7 @@ class UTG1000x(BaseAWG):
             self._send_command(f":CHAN{channel}:OUTPUT {'ON' if on else 'OFF'}")
 
     def set_frequency(self, channel: int, freq: float):
-        if DEBUG_OUT:
-            print(f"{MYNAME}: set_frequency(channel: {channel}, freq:{freq})")
+        self.printdebug(f"set_frequency(channel: {channel}, freq:{freq})")
 
         if channel is not None and channel not in CHANNELS:
             raise UnknownChannelError(CHANNELS_ERROR)
@@ -116,8 +108,7 @@ class UTG1000x(BaseAWG):
             self._send_command(f":CHAN{channel}:BASE:FREQ {freq:.10f}")
 
     def set_phase(self, channel: int, phase: float):
-        if DEBUG_OUT:
-            print(f"{MYNAME}: set_phase(channel: {channel}, phase: {phase})")
+        self.printdebug(f"set_phase(channel: {channel}, phase: {phase})")
         # phase settings do not really work on this device, but I try anyway
         if channel is not None and channel not in CHANNELS:
             raise UnknownChannelError(CHANNELS_ERROR)
@@ -141,8 +132,7 @@ class UTG1000x(BaseAWG):
             self._send_command(f":CHAN{channel}:BASE:PHASE {phase}")
 
     def set_wave_type(self, channel: int, wave_type: int):
-        if DEBUG_OUT:
-            print(f"{MYNAME}: set_wave_type(channel: {channel}, wavetype:{wave_type})")
+        self.printdebug(f"set_wave_type(channel: {channel}, wavetype:{wave_type})")
 
         if wave_type not in constants.WAVE_TYPES:
             raise ValueError("Incorrect wave type.")
@@ -159,8 +149,7 @@ class UTG1000x(BaseAWG):
             self._send_command(cmd)
 
     def set_amplitude(self, channel: int, amplitude: float):
-        if DEBUG_OUT:
-            print(f"{MYNAME}: set_amplitude(channel: {channel}, amplitude:{amplitude})")
+        self.printdebug(f"set_amplitude(channel: {channel}, amplitude:{amplitude})")
 
         if channel is not None and channel not in CHANNELS:
             raise UnknownChannelError(CHANNELS_ERROR)
@@ -174,8 +163,7 @@ class UTG1000x(BaseAWG):
             self._send_command(f":CHAN{channel}:BASE:AMPL {amplitude:.3f}")
 
     def set_offset(self, channel: int, offset: float):
-        if DEBUG_OUT:
-            print(f"{MYNAME}: set_offset(channel: {channel}, offset:{offset})")
+        self.printdebug(f"set_offset(channel: {channel}, offset:{offset})")
         if channel is not None and channel not in CHANNELS:
             raise UnknownChannelError(CHANNELS_ERROR)
 
@@ -188,8 +176,7 @@ class UTG1000x(BaseAWG):
             self._send_command(f":CHAN{channel}:BASE:OFFS {offset}")
 
     def set_load_impedance(self, channel: int, z: float):
-        if DEBUG_OUT:
-            print(f"{MYNAME}: set_load_impedance(channel: {channel}, impedance:{z})")
+        self.printdebug(f"set_load_impedance(channel: {channel}, impedance:{z})")
 
         if channel is not None and channel not in CHANNELS:
             raise UnknownChannelError(CHANNELS_ERROR)
