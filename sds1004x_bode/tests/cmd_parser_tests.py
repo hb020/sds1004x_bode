@@ -6,8 +6,12 @@ Created on May 4, 2018
 @note: Tests the command_parser.py module.
 '''
 
-from sds1004x_bode.command_parser import CommandParser
-from sds1004x_bode.awgdrivers.dummy_awg import DummyAWG
+# stuff needed to get the modules from the parent directory
+import sys
+sys.path.insert(0, '..')
+
+from command_parser import CommandParser
+from awgdrivers.dummy_awg import DummyAWG
 
 
 if __name__ == '__main__':
@@ -15,7 +19,8 @@ if __name__ == '__main__':
         lines = f.readlines()
 
     port = "/dev/ttyUSB0"
-    awg = DummyAWG()
+    baud = 115200
+    awg = DummyAWG(port=port, baud_rate=baud, log_debug=True)
     awg.initialize()
 
     parser = CommandParser(awg)
