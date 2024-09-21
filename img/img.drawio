@@ -4,51 +4,51 @@
       <root>
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
-        <mxCell id="sCDYAXPlD_U_MaXzedzM-4" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="1" source="sCDYAXPlD_U_MaXzedzM-1" target="sCDYAXPlD_U_MaXzedzM-2">
+        <mxCell id="sCDYAXPlD_U_MaXzedzM-4" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" parent="1" source="sCDYAXPlD_U_MaXzedzM-1" target="sCDYAXPlD_U_MaXzedzM-2" edge="1">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-        <mxCell id="sCDYAXPlD_U_MaXzedzM-6" value="LAN" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" vertex="1" connectable="0" parent="sCDYAXPlD_U_MaXzedzM-4">
+        <mxCell id="sCDYAXPlD_U_MaXzedzM-6" value="LAN" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" parent="sCDYAXPlD_U_MaXzedzM-4" vertex="1" connectable="0">
           <mxGeometry x="-0.125" relative="1" as="geometry">
             <mxPoint as="offset" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="sCDYAXPlD_U_MaXzedzM-1" value="Siglent Scope" style="rounded=0;whiteSpace=wrap;html=1;verticalAlign=top;align=center;" vertex="1" parent="1">
+        <mxCell id="sCDYAXPlD_U_MaXzedzM-1" value="Siglent Scope" style="rounded=0;whiteSpace=wrap;html=1;verticalAlign=top;align=center;" parent="1" vertex="1">
           <mxGeometry x="120" y="160" width="120" height="90" as="geometry" />
         </mxCell>
-        <mxCell id="sCDYAXPlD_U_MaXzedzM-5" value="LAN&lt;div&gt;Serial&lt;/div&gt;&lt;div&gt;USB&lt;/div&gt;" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="1" source="sCDYAXPlD_U_MaXzedzM-2" target="sCDYAXPlD_U_MaXzedzM-3">
+        <mxCell id="sCDYAXPlD_U_MaXzedzM-5" value="LAN&lt;div&gt;Serial&lt;/div&gt;&lt;div&gt;USB&lt;/div&gt;" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" parent="1" source="sCDYAXPlD_U_MaXzedzM-2" target="sCDYAXPlD_U_MaXzedzM-3" edge="1">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-        <mxCell id="sCDYAXPlD_U_MaXzedzM-2" value="PC" style="rounded=0;whiteSpace=wrap;html=1;verticalAlign=top;align=center;" vertex="1" parent="1">
+        <mxCell id="sCDYAXPlD_U_MaXzedzM-2" value="PC" style="rounded=0;whiteSpace=wrap;html=1;verticalAlign=top;align=center;" parent="1" vertex="1">
           <mxGeometry x="320" y="160" width="120" height="90" as="geometry" />
         </mxCell>
-        <mxCell id="sCDYAXPlD_U_MaXzedzM-3" value="&amp;nbsp;non siglent AWG" style="rounded=0;whiteSpace=wrap;html=1;verticalAlign=middle;" vertex="1" parent="1">
+        <mxCell id="sCDYAXPlD_U_MaXzedzM-3" value="&amp;nbsp;non siglent AWG" style="rounded=0;whiteSpace=wrap;html=1;verticalAlign=middle;" parent="1" vertex="1">
           <mxGeometry x="520" y="160" width="120" height="90" as="geometry" />
         </mxCell>
-        <mxCell id="sCDYAXPlD_U_MaXzedzM-11" value="LAN&lt;div&gt;Serial&lt;/div&gt;&lt;div&gt;USB&lt;/div&gt;" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="1" source="sCDYAXPlD_U_MaXzedzM-12" target="sCDYAXPlD_U_MaXzedzM-13">
+        <mxCell id="sCDYAXPlD_U_MaXzedzM-11" value="LAN&lt;div&gt;Serial&lt;/div&gt;&lt;div&gt;USB&lt;/div&gt;" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" parent="1" source="sCDYAXPlD_U_MaXzedzM-12" target="sCDYAXPlD_U_MaXzedzM-13" edge="1">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-        <mxCell id="sCDYAXPlD_U_MaXzedzM-12" value="PC" style="rounded=0;whiteSpace=wrap;html=1;verticalAlign=top;align=center;" vertex="1" parent="1">
+        <mxCell id="sCDYAXPlD_U_MaXzedzM-12" value="PC" style="rounded=0;whiteSpace=wrap;html=1;verticalAlign=top;align=center;" parent="1" vertex="1">
           <mxGeometry x="190" y="300" width="250" height="90" as="geometry" />
         </mxCell>
-        <mxCell id="sCDYAXPlD_U_MaXzedzM-13" value="&amp;nbsp;non siglent AWG" style="rounded=0;whiteSpace=wrap;html=1;verticalAlign=middle;" vertex="1" parent="1">
+        <mxCell id="sCDYAXPlD_U_MaXzedzM-13" value="&amp;nbsp;non VXI-11,&lt;br&gt;non siglent AWG" style="rounded=0;whiteSpace=wrap;html=1;verticalAlign=middle;" parent="1" vertex="1">
           <mxGeometry x="520" y="300" width="120" height="90" as="geometry" />
         </mxCell>
-        <mxCell id="sCDYAXPlD_U_MaXzedzM-17" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="1" source="sCDYAXPlD_U_MaXzedzM-14" target="sCDYAXPlD_U_MaXzedzM-15">
+        <mxCell id="sCDYAXPlD_U_MaXzedzM-17" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" parent="1" source="sCDYAXPlD_U_MaXzedzM-14" target="sCDYAXPlD_U_MaXzedzM-15" edge="1">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-        <mxCell id="sCDYAXPlD_U_MaXzedzM-14" value="Automation&lt;div&gt;via&lt;/div&gt;&lt;div&gt;VISA&lt;/div&gt;" style="shape=process;whiteSpace=wrap;html=1;backgroundOutline=1;" vertex="1" parent="1">
+        <mxCell id="sCDYAXPlD_U_MaXzedzM-14" value="Automation&lt;div&gt;via&lt;/div&gt;&lt;div&gt;VISA&lt;/div&gt;" style="shape=process;whiteSpace=wrap;html=1;backgroundOutline=1;" parent="1" vertex="1">
           <mxGeometry x="220" y="330" width="79" height="40" as="geometry" />
         </mxCell>
-        <mxCell id="sCDYAXPlD_U_MaXzedzM-15" value="bode.py" style="shape=process;whiteSpace=wrap;html=1;backgroundOutline=1;" vertex="1" parent="1">
+        <mxCell id="sCDYAXPlD_U_MaXzedzM-15" value="bode.py" style="shape=process;whiteSpace=wrap;html=1;backgroundOutline=1;" parent="1" vertex="1">
           <mxGeometry x="344" y="330" width="70" height="40" as="geometry" />
         </mxCell>
-        <mxCell id="sCDYAXPlD_U_MaXzedzM-16" value="bode.py" style="shape=process;whiteSpace=wrap;html=1;backgroundOutline=1;" vertex="1" parent="1">
+        <mxCell id="sCDYAXPlD_U_MaXzedzM-16" value="bode.py" style="shape=process;whiteSpace=wrap;html=1;backgroundOutline=1;" parent="1" vertex="1">
           <mxGeometry x="344" y="190" width="70" height="40" as="geometry" />
         </mxCell>
-        <mxCell id="sCDYAXPlD_U_MaXzedzM-18" value="Bode Plot" style="shape=process;whiteSpace=wrap;html=1;backgroundOutline=1;" vertex="1" parent="1">
+        <mxCell id="sCDYAXPlD_U_MaXzedzM-18" value="Bode Plot" style="shape=process;whiteSpace=wrap;html=1;backgroundOutline=1;" parent="1" vertex="1">
           <mxGeometry x="144" y="190" width="70" height="40" as="geometry" />
         </mxCell>
-        <mxCell id="sCDYAXPlD_U_MaXzedzM-19" value="OR" style="text;html=1;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" vertex="1" parent="1">
+        <mxCell id="sCDYAXPlD_U_MaXzedzM-19" value="OR" style="text;html=1;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" parent="1" vertex="1">
           <mxGeometry x="344" y="260" width="60" height="30" as="geometry" />
         </mxCell>
       </root>
