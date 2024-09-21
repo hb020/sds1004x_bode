@@ -4,6 +4,8 @@ Bode plot with Siglent oscilloscopes (SDS1000X-E, SDS800X-HD, SDS1000X-HD, and p
 
 Can also be used as a regular VXI-11 front-end for the supported AWGs, without the Siglent scope.
 
+![Use cases](img/setup.png "Use cases")
+
 ## Overview
 
 At a certain point after getting the SDS1204X-E oscilloscope I started to wonder if it might be possible to use the Bode plot function with a non-Siglent waveform generator. After some hours of researching and reverse engineering I wrote this Python program which is a small server which emulates Siglent arbitrary waveform generator.
