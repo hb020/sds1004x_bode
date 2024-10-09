@@ -5,13 +5,23 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description="Test simple SCPI communication via VISA.",
                                      formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     parser.add_argument("port", type=str, nargs='?', default=None, help="The port to use. Must be a Visa compatible connection string.")
+    parser.add_argument("-n", action="store_true", default=False, help="No scan for test SCPI devices. Will be ignored when port is not defined.")
     args = parser.parse_args()
         
     rm = pyvisa.ResourceManager()
-    print("VISA Resources found: ", end='')
-    print(rm.list_resources())
+    skip_scan = args.n
+    if not args.port:
+        skip_scan = False
+    if not skip_scan:
+        print("Scanning for VISA resources...")
+        print("VISA Resources found: ", end='')
+        print(rm.list_resources())
+    else:
+        print("No scan for VISA resources.")
     if args.port:
+        print(f"Connecting to '{args.port}'")
         inst = rm.open_resource(args.port, timeout=10000)  # You need a large timeout when using serial AWGs
+        print("Connected.")
         msgs = ["*IDN?", 
                 "IDN-SGLT-PRI?", 
                 "C1:OUTP LOAD,50;BSWV WVTP,SINE,PHSE,0,FRQ,50000,AMP,2.1,OFST,0;OUTP ON",
