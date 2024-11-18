@@ -3,7 +3,7 @@ Created on Apr 24, 2018
 
 @author: 4x1md
 
-Driver for JDS6600 AWG.
+Driver for JDS6600 AWG, and probably others, like JDS2900
 '''
 
 import serial
@@ -104,7 +104,7 @@ class JDS6600(BaseAWG):
 
         Command examples:
             :w23=25786,0.
-                sets the output frequency of channel 1 to 2578.6Hz.
+                sets the output frequency of channel 1 to 257.86Hz.
             :w23=25786,1.
                 sets the output frequency of channel 1 to 2578.6kHz.
             :w24=25786,3.
