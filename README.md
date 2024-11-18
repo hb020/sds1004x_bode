@@ -28,7 +28,7 @@ As of September 2024 the program supports the following models:
 
 * **BK Precision BK4075** One channel 25MHz AWG. ```port``` must be a serial port. You must also provide ```baud_rate``` if you use another speed than 19200. See below. You might also be able to get this AWG working via the visa driver.
 
-* **RD JDS6600** Chinese generator which is widely sold on eBay and AliExpress. ```port``` must be a serial port. See below.
+* **RD JDS6600** Chinese generator which is widely sold on eBay and AliExpress. This driver may also work on others from the same series, like the JDS2900. ```port``` must be a serial port. See below.
 
 * **Feeltech FYxxxx** A range of Chinese generators. This driver is a newer driver than has some improvements over the older FY6600 driver, and supports FY2300, FY6600, FY6800, the older FY6900 and probably more. ```port``` must be a serial port. See below.
 
