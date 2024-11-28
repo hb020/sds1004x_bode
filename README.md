@@ -191,7 +191,7 @@ This is possible, but you should set a large timeout on your ```Instrument``` or
 
 ## Follow-up Projects
 
-* [espBode](https://github.com/PanKaczka/espBode) by [Jakub Stępniewicz SQ6SFO](https://github.com/PanKaczka) - an interface between a Siglent SDS1004X-E oscilloscope and FY6800 AWG implemented on ESP-01 module.
+* [espBode](https://github.com/awakephd/espBode) - an interface between a Siglent SDS1000X-E/SDS800X-HD/SDS1000X-HD scope and FY AWGs implemented on ESP-01 module. This is a complete rewrite of various espBode repos for only SDS1000X-E, like https://github.com/Hamhackin/espBode and https://github.com/PanKaczka/espBode.
 
 ## Contributing
 
