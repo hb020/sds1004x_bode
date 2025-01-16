@@ -139,14 +139,19 @@ When done, you can stop the process via Ctrl-C.
 
 If you get an error message with  ```Address already in use. Cannot use ... for listening.```, use ```netstat``` or ```lsof``` to look what process is already using the port. It might be because you have nfs.server running via rpcbind. For that case, just disable it while running the bode plot: ```sudo systemctl stop rpcbind.socket rpcbind.service```.
 
-## SCPI compatible AWGs
+## Support for other AWGs and Contributing
 
-Many different SCPI dialects exist. If you have an AWG that is not listed but is SCPI compatible, you may try one of the existing SCPI drivers (```dg800``` or ```utg1000x```). If you want to do a quick test, adapt `awg_tests.py` to your device and address, it will test all commands. If your device does not talk one of the existing dialects, you can create a new one easily by using one of the existing drivers as example. Please tell us if you have done so (via github Issue or Pull request), so that we can add the device to the list.
+I'd like to add here more AWGs but it's impossible to have them all at the home lab, so I have to rely on your cooperation for the adding of more drivers.
+
+If you have an AWG that is not listed, but is compatible with one of the existing drivers (which is more easily the case with SCPI AWGs of the same brand), tell us so (via github Issue or Pull request), so that we can add the device to the list.
+
+If you have an AWG that is not compatible, you often can create a new driver easily by using one of the existing drivers as example. Especially SCPI drivers are easy to do. Again, please tell us if you have done so (via github Issue or Pull request), so that we can add the driver.
+
+For driver testing, you can use [```awg_tests.py```](/sds1004x_bode/tests/awg_tests.py). Adapt it to your device and address, and it will test all commands.
 
 ## Using independently from the scope, via VISA
 
 This is possible, but you should set a large timeout on your ```Instrument``` or when using ```open_resource()``` when using serial AWGs. See the example in [```testSCPI.py```](/sds1004x_bode/tests/testSCPI.py)
-
 
 ## Changelog
 
@@ -193,10 +198,6 @@ This is possible, but you should set a large timeout on your ```Instrument``` or
 
 * [espBode](https://github.com/awakephd/espBode) - an interface between a Siglent SDS1000X-E/SDS800X-HD/SDS1000X-HD scope and FY AWGs implemented on ESP-01 module. This is a complete rewrite of various espBode repos for only SDS1000X-E, like https://github.com/Hamhackin/espBode and https://github.com/PanKaczka/espBode.
 
-## Contributing
-
-I'd like to add here more AWGs but it's impossible to have them all at the home lab. If you'd like to write a driver for an AWG which isn't listed here, please contact me.
-
 ## Authors
 
 * **Dmitry Melnichansky [@4x1md](https://github.com/4x1md)** - Project idea and implementation.
@@ -215,27 +216,3 @@ I'd like to add here more AWGs but it's impossible to have them all at the home 
 
 1. [Siglent SDS1104X-E and SDS1204X-E: Bode plot with non-Siglent AWG](http://www.eevblog.com/forum/testgear/siglent-sds1104x-e-and-sds1204x-e-bode-plot-with-non-siglent-awg/) on EEVblog Forum.
 2. [Running the script with SDS1204X-E and JDS6600 AWG](https://www.youtube.com/watch?v=7PvueUHAJ78) on YouTube (best viewed in 1080p quality).
-
-## Questions? Suggestions?
-
-You are more than welcome to contact me with any questions, suggestions or propositions regarding this project. You can:
-
-1. Visit [my QRZ.COM page](https://www.qrz.com/db/4X1MD)
-2. Visit [my Facebook profile](https://www.facebook.com/Dima.Meln)
-3. :email: Write me an email to iosaaris =at= gmail dot com
-
-## How to Support or Say Thanks
-
-If you like this project, or found here some useful information and want to say thanks, or encourage me to do more, you can buy me a coffee!
-
-[![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/Q5Q4ITR7J)
-
-[!["Buy Me A Coffee"](https://www.buymeacoffee.com/assets/img/custom_images/orange_img.png)](https://www.buymeacoffee.com/4x1md)
-
-You can aslo make a donation with PayPal:
-
-[!["Donate with PayPal"](https://www.paypalobjects.com/en_US/i/btn/btn_donateCC_LG.gif)](https://www.paypal.com/donate/?hosted_button_id=NZZWZFH5ZBCCU)
-
----
-
-**73 de 4X1MD**
