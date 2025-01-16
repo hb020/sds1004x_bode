@@ -155,6 +155,10 @@ This is possible, but you should set a large timeout on your ```Instrument``` or
 
 ## Changelog
 
+### 2025-01-16
+
+* easier testing of new drivers
+
 ### 2024-09-19
 
 * new driver for newer fy6900 devices.
