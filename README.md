@@ -22,7 +22,7 @@ As of January 2025 the program supports the following models:
 
 * **Uni-Trend UTG1000X (like the UTG1022X)** This is a 2 channel 20 or 40MHz AWG. It connects to the PC via USB, and talks a dialect of the SCPI 1992.0 standard. There may be other devices that use this same dialect, so you may be able to use this driver for other AWGs, especially those from Uni-T. ```port``` must be a Visa compatible connection string. See below.
 
-* **Uni-Trend UTG900E (like the UTG932E)** This is a 2 channel 30 or 60MHz AWG. It connects to the PC via USB, and talks a dialect of the SCPI 1992.0 standard, that is very much like the UTG100X series, but has a bit less error checking in it. ```port``` must be a Visa compatible connection string. See below.
+* **Uni-Trend UTG900E (like the UTG932E)** This is a 2 channel 30 or 60MHz AWG. It connects to the PC via USB, and talks a dialect of the SCPI 1992.0 standard, that is very much like the UTG100X series, but has less error checking in it, so this might be the driver to use when you have older Uni-T devices. ```port``` must be a Visa compatible connection string. See below.
 
 * **Rigol DG800/DG900/DG1000Z series (like the DG811..DG992 and DG1062Z)**. When "liberated", those are  2 channel up to 100MHz AWGs with USB and ethernet interface [^1], that talks a dialect of the SCPI 1992.0 standard. There may be other devices that use this same dialect, so you may be able to use this driver for other AWGs. ```port``` must be a Visa compatible connection string, be it USB or ethernet. See below.
 
