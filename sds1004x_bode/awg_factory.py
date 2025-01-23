@@ -15,6 +15,7 @@ from awgdrivers.fy6600 import FY6600
 from awgdrivers.ad9910 import AD9910
 from awgdrivers.dg800 import RigolDG800
 from awgdrivers.utg1000x import UTG1000x
+from awgdrivers.utg900e import UTG900e
 
 
 class AwgFactory(object):
@@ -46,7 +47,8 @@ drivers = (
     FY6600,
     AD9910,
     RigolDG800,
-    UTG1000x
+    UTG1000x,
+    UTG900e
 )
 for driver in drivers:
     awg_factory.add_awg(driver.SHORT_NAME, driver)

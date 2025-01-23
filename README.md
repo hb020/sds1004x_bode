@@ -18,9 +18,11 @@ The current version of the program was tested under Linux and MacOS only. It wil
 
 ## Supported AWG Models
 
-As of September 2024 the program supports the following models:
+As of January 2025 the program supports the following models:
 
-* **Uni-Trend UTG1000x (like the UTG1022X)** This is a 2 channel 40MHz AWG. It connects to the PC via USB, and talks a dialect of the SCPI 1992.0 standard. There may be other devices that use this same dialect, so you may be able to use this driver for other AWGs. ```port``` must be a Visa compatible connection string. See below.
+* **Uni-Trend UTG1000X (like the UTG1022X)** This is a 2 channel 20 or 40MHz AWG. It connects to the PC via USB, and talks a dialect of the SCPI 1992.0 standard. There may be other devices that use this same dialect, so you may be able to use this driver for other AWGs, especially those from Uni-T. ```port``` must be a Visa compatible connection string. See below.
+
+* **Uni-Trend UTG900E (like the UTG932EUTG1022X)** This is a 2 channel 30 or 60MHz AWG. It connects to the PC via USB, and talks a dialect of the SCPI 1992.0 standard, that is very much like the UTG100X series, but has a bit less error checking in it. ```port``` must be a Visa compatible connection string. See below.
 
 * **Rigol DG800/DG900/DG1000Z series (like the DG811..DG992 and DG1062Z)**. When "liberated", those are  2 channel up to 100MHz AWGs with USB and ethernet interface [^1], that talks a dialect of the SCPI 1992.0 standard. There may be other devices that use this same dialect, so you may be able to use this driver for other AWGs. ```port``` must be a Visa compatible connection string, be it USB or ethernet. See below.
 
@@ -56,6 +58,8 @@ You will need the following pip packages:
 
 If you have an old python version, you may also need to upgrade the ```typing_extensions``` version (as required by PyVISA-py).
 
+You should not need to install any other VISA drivers.
+
 ## Running The Program
 
 The source code is located in the [```sds1004x_bode```](/sds1004x_bode) directory of this repository.
@@ -68,7 +72,7 @@ The program must be run in a command line terminal. The file to be run is ```bod
 
 where
 
-* ```<awg_name>``` is the name of the AWG connected to your PC:  ```jds6600```, ```bk4075```, ```fy```, ```fy6900```, ```fy6600```, ```ad9910```, ```dg800```, ```utg1000x``` or ```dummy```.
+* ```<awg_name>``` is the name of the AWG connected to your PC:  ```jds6600```, ```bk4075```, ```fy```, ```fy6900```, ```fy6600```, ```ad9910```, ```dg800```, ```utg900e```, ```utg1000x``` or ```dummy```.
 
 * ```<port>``` is the port to which your AWG is connected. The type depends on your AWG, see the explanations above. For serial port AWGs, it will be something like ```/dev/ttyUSB0``` or ```/dev/ttyACM0```. If you use the ```dummy``` generator, you don't have to specify the port. If you use one of the SCPI compatible devices like the ```dg800``` or ```utg1000x```, you must specify a Visa compatible connection string, like ```TCPIP::192.168.001.204::INSTR``` or ```USB0::9893::6453::DG1234567890A::0::INSTR```
 
@@ -140,6 +144,8 @@ When done, you can stop the process via Ctrl-C.
 
 If you get an error message with  ```Address already in use. Cannot use ... for listening.```, use ```netstat``` or ```lsof``` to look what process is already using the port. It might be because you have nfs.server running via rpcbind. For that case, just disable it while running the bode plot: ```sudo systemctl stop rpcbind.socket rpcbind.service```.
 
+If you see a warning message with `VI_WARN_CONFIG_NLOADED`, that probably means you have installed a lower level VISA driver, and have not provided a config file for it. Know that it is unlikely that you'd need a VISA driver (apart from the python packages). So in order to suppress the warning message, either add the config file (sorry, that depends on the driver you installed, too many variants out there), or better, remove the VISA driver, unless you need that driver with other tools.
+
 ## Support for other AWGs and Contributing
 
 I'd like to add here more AWGs but it's impossible to have them all at the home lab, so I have to rely on your cooperation for the adding of more drivers.
@@ -156,6 +162,10 @@ This is possible, but you should set a large timeout on your ```Instrument``` or
 
 ## Changelog
 
+### 2025-01-23
+
+* added utg900e driver (beta)
+  
 ### 2025-01-16
 
 * easier testing of new drivers
