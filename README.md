@@ -32,7 +32,7 @@ As of January 2025 the program supports the following models:
 
 * **RD JDS6600** Chinese generator which is widely sold on eBay and AliExpress. This driver may also work on others from the same series, like the JDS2900. ```port``` must be a serial port. See below.
 
-* **Feeltech FYxxxx** A range of Chinese generators. This driver is a newer driver than has some improvements over the older FY6600 driver, and supports FY2300, FY6600, FY6800, the older FY6900 and probably more. ```port``` must be a serial port. See below.
+* **Feeltech FYxxxx** A range of Chinese generators. This driver is a newer driver that has some improvements over the older FY6600 driver, and supports FY2300, FY6600, FY6800, the older FY6900 and probably more. ```port``` must be a serial port. See below.
 
 * **Feeltech FY6900** A Chinese generator. This driver has some improvements that are needed for the later FY6900 versions, that require the frequency to be sent as Hz instead of uHz. For the rest it is the same driver as the generic FY driver. ```port``` must be a serial port. See below.
 
@@ -164,7 +164,7 @@ This is possible, but you should set a large timeout on your ```Instrument``` or
 
 ### 2025-01-23
 
-* added utg900e driver (beta)
+* added utg900e driver
   
 ### 2025-01-16
 
