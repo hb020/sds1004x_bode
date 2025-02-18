@@ -15,7 +15,19 @@ if __name__ == '__main__':
     if not skip_scan:
         print("Scanning for VISA resources...")
         print("VISA Resources found: ", end='')
-        print(rm.list_resources())
+        resources = rm.list_resources()
+        print(resources)
+        for m in resources:            
+            if m.startswith("ASRL/dev/cu."):
+                # some of these devices are not SCPI compatible, like "ASRL/dev/cu.Bluetooth-Incoming-Port::INSTR"
+                print(f"Skipping serial port \"{m}\"")
+                continue
+            try:
+                inst = rm.open_resource(m, timeout=1000)
+                r = inst.query("*IDN?").strip()
+                print(f"Found \"{r}\" on address \"{m}\"")
+            except:
+                print(f"Found unknown device on address \"{m}\"")
     else:
         print("No scan for VISA resources.")
     if args.port:
