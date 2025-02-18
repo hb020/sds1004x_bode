@@ -20,25 +20,43 @@ The current version of the program was tested under Linux and MacOS only. It wil
 
 As of January 2025 the program supports the following models:
 
-* **Uni-Trend UTG1000X (like the UTG1022X)** This is a 2 channel 20 or 40MHz AWG. It connects to the PC via USB, and talks a dialect of the SCPI 1992.0 standard. There may be other devices that use this same dialect, so you may be able to use this driver for other AWGs, especially those from Uni-T. ```port``` must be a Visa compatible connection string. See below.
+* **Uni-Trend UTG1000X (like the UTG1022X)** This is a 2 channel 20 or 40MHz AWG. It connects to the PC via USB, and talks a dialect of the SCPI 1992.0 standard. There may be other devices that use this same dialect, so you may be able to use this driver for other AWGs, especially those from Uni-T.
 
-* **Uni-Trend UTG900E (like the UTG932E)** This is a 2 channel 30 or 60MHz AWG. It connects to the PC via USB, and talks a dialect of the SCPI 1992.0 standard, that is very much like the UTG100X series, but has less error checking in it, so this might be the driver to use when you have older Uni-T devices. ```port``` must be a Visa compatible connection string. See below.
+  ```port``` must be a Visa compatible connection string. See below.
 
-* **Rigol DG800/DG900/DG1000Z series (like the DG811..DG992 and DG1062Z)**. When "liberated", those are  2 channel up to 100MHz AWGs with USB and ethernet interface [^1], that talks a dialect of the SCPI 1992.0 standard. There may be other devices that use this same dialect, so you may be able to use this driver for other AWGs. ```port``` must be a Visa compatible connection string, be it USB or ethernet. See below.
+* **Uni-Trend UTG900E (like the UTG932E)** This is a 2 channel 30 or 60MHz AWG. It connects to the PC via USB, and talks a dialect of the SCPI 1992.0 standard, that is very much like the UTG1000X series, but has less error checking in it, so this might be the driver to use when you have older Uni-T devices.
+
+  ```port``` must be a Visa compatible connection string. See below.
+
+* **Rigol DG800/DG900/DG1000Z series (like the DG811..DG992 and DG1062Z)**. When "liberated", those are  2 channel up to 100MHz AWGs with USB and ethernet interface [^1], that talks a dialect of the SCPI 1992.0 standard. There may be other devices that use this same dialect, so you may be able to use this driver for other AWGs.
+
+  ```port``` must be a Visa compatible connection string, be it USB or ethernet. See below.
 
     [^1]: On the DG800/DG900, the ethernet interface requires a suitable adapter. It is however strongly recommended to use this interface.
 
-* **BK Precision BK4075** One channel 25MHz AWG. ```port``` must be a serial port. You must also provide ```baud_rate``` if you use another speed than 19200. See below. You might also be able to get this AWG working via the visa driver.
+* **BK Precision BK4075** One channel 25MHz AWG. It uses a serial driver, but you might also be able to get this AWG working via a visa driver.
 
-* **RD JDS6600** Chinese generator which is widely sold on eBay and AliExpress. This driver may also work on others from the same series, like the JDS2900. ```port``` must be a serial port. See below.
+  ```port``` must be a serial port. You must also provide ```baud_rate``` if you use another speed than 19200. See below.
 
-* **Feeltech FYxxxx** A range of Chinese generators. This driver is a newer driver that has some improvements over the older FY6600 driver, and supports FY2300, FY6600, FY6800, the older FY6900 and probably more. ```port``` must be a serial port. See below.
+* **RD JDS6600** Chinese generator which is widely sold on eBay and AliExpress. This driver may also work on others from the same series, like the JDS2900.
 
-* **Feeltech FY6900** A Chinese generator. This driver has some improvements that are needed for the later FY6900 versions, that require the frequency to be sent as Hz instead of uHz. For the rest it is the same driver as the generic FY driver. ```port``` must be a serial port. See below.
+  ```port``` must be a serial port. See below.
 
-* **Feeltech FY6600** Another Chinese generator which is widely sold on eBay and AliExpress. This is an older driver that has less checking. Use it when the above drivers do not work. This will however mean that some changes to the above drivers might be needed. ```port``` must be a serial port. See below.
+* **Feeltech FYxxxx** A range of Chinese generators. This driver is a newer driver that has some improvements over the older FY6600 driver, and supports FY2300, FY6600, FY6800, the older FY6900 and probably more.
 
-* **AD9910 Arduino Shield** [DDS AD9910 Shield](https://gra-afch.com/catalog/rf-units/dds-ad9910-arduino-shield/). ```port``` must be a serial port. See below.
+  ```port``` must be a serial port. See below.
+
+* **Feeltech FY6900** A Chinese generator. This driver has some improvements that are needed for the later FY6900 versions, that require the frequency to be sent as Hz instead of uHz. For the rest it is the same driver as the generic FY driver.
+
+  ```port``` must be a serial port. See below.
+
+* **Feeltech FY6600** Another Chinese generator which is widely sold on eBay and AliExpress. This is an older driver that has less checking. Use it when the above drivers do not work. This will however mean that some changes to the above drivers might be needed.
+
+  ```port``` must be a serial port. See below.
+
+* **AD9910 Arduino Shield** [DDS AD9910 Shield](https://gra-afch.com/catalog/rf-units/dds-ad9910-arduino-shield/).
+
+  ```port``` must be a serial port. See below.
 
 ## Oscilloscope Configuration
 
@@ -72,17 +90,21 @@ The program must be run in a command line terminal. The file to be run is ```bod
 
 where
 
-* ```<awg_name>``` is the name of the AWG connected to your PC:  ```jds6600```, ```bk4075```, ```fy```, ```fy6900```, ```fy6600```, ```ad9910```, ```dg800```, ```utg900e```, ```utg1000x``` or ```dummy```.
+* ```<awg_name>``` is the name of the AWG connected to your PC:  ```jds6600```, ```bk4075```, ```fy```, ```fy6900```, ```fy6600```, ```ad9910```, ```dg800```, ```utg900e```, ```utg1000x``` or ```dummy```. The ```dummy``` generator was added for running this program without connecting a signal generator. The program will emulate a Siglent AWG and the oscilloscope will generate a Bode plot but no commands will be sent to the AWG.
 
-* ```<port>``` is the port to which your AWG is connected. The type depends on your AWG, see the explanations above. For serial port AWGs, it will be something like ```/dev/ttyUSB0``` or ```/dev/ttyACM0```. If you use the ```dummy``` generator, you don't have to specify the port. If you use one of the SCPI compatible devices like the ```dg800``` or ```utg1000x```, you must specify a Visa compatible connection string, like ```TCPIP::192.168.001.204::INSTR``` or ```USB0::9893::6453::DG1234567890A::0::INSTR```
+* ```<port>``` is the port to which your AWG is connected. The type depends on your AWG, see the explanations above.
 
-* ```<baud_rate>``` The serial baud rate as defined in the AWG settings. ```bk4075``` uses a default speed of 19200. All others run on 115200, and this parameter will be ignored for them.
+  For serial port AWGs, it will be something like ```/dev/ttyUSB0``` or ```/dev/ttyACM0```.
 
-The ```dummy``` generator was added for running this program without connecting a signal generator. The program will emulate a Siglent AWG and the oscilloscope will generate a Bode plot but no commands will be sent to the AWG.
+  If you use one of the SCPI compatible devices like the ```dg800``` or ```utg1000x```, you must specify a Visa compatible connection string, like ```TCPIP::192.168.001.204::INSTR``` or ```USB0::9893::6453::DG1234567890A::0::INSTR```
 
-Use ```-h``` for help text.
+  If you use the ```dummy``` generator, you don't have to specify the port. 
 
-Use ```-v``` or ```-vv``` or ```-vvv``` for logging verbosity. The first logs the driver info, the next also logs VXI-11 info, the last also logs port mapper info. By default, only the startup phase and the incoming commands are logged.
+* ```<baud_rate>``` The serial baud rate as defined in the AWG settings. ```bk4075``` uses a default speed of 19200. All others run on 115200 baud or on Visa, and this parameter will be ignored for them.
+
+* Use ```-h``` for help text.
+
+* Use ```-v``` or ```-vv``` or ```-vvv``` for logging verbosity. The first logs the driver info, the next also logs VXI-11 info, the last also logs port mapper info. By default, only the startup phase and the incoming commands are logged.
 
 If the program starts successfully, and with ```-vvv```, you'll see the following output:
 
