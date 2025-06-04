@@ -28,11 +28,15 @@ As of January 2025 the program supports the following models:
 
   ```port``` must be a Visa compatible connection string. See below.
 
-* **Rigol DG800/DG900/DG1000Z series (like the DG811..DG992 and DG1062Z)**. When "liberated", those are  2 channel up to 100MHz AWGs with USB and ethernet interface [^1], that talks a dialect of the SCPI 1992.0 standard. There may be other devices that use this same dialect, so you may be able to use this driver for other AWGs.
+* **Rigol DG800/DG900/DG1000Z series (like the DG811..DG992 and DG1062Z)**. (Not suitable for the Pro series, see below) When "liberated", those are  2 channel up to 100MHz AWGs with USB and ethernet interface [^1], that talks a dialect of the SCPI 1992.0 standard. There may be other devices that use this same dialect, so you may be able to use this driver for other AWGs.
 
   ```port``` must be a Visa compatible connection string, be it USB or ethernet. See below.
 
     [^1]: On the DG800/DG900, the ethernet interface requires a suitable adapter. It is however strongly recommended to use this interface.
+
+* **Rigol DG800/DG900 Pro series**. Newer version of the above.
+
+  ```port``` must be a Visa compatible connection string, be it USB or ethernet. See below.
 
 * **BK Precision BK4075** One channel 25MHz AWG. It uses a serial driver, but you might also be able to get this AWG working via a visa driver.
 
@@ -90,13 +94,13 @@ The program must be run in a command line terminal. The file to be run is ```bod
 
 where
 
-* ```<awg_name>``` is the name of the AWG connected to your PC:  ```jds6600```, ```bk4075```, ```fy```, ```fy6900```, ```fy6600```, ```ad9910```, ```dg800```, ```utg900e```, ```utg1000x``` or ```dummy```. The ```dummy``` generator was added for running this program without connecting a signal generator. The program will emulate a Siglent AWG and the oscilloscope will generate a Bode plot but no commands will be sent to the AWG.
+* ```<awg_name>``` is the name of the AWG connected to your PC:  ```jds6600```, ```bk4075```, ```fy```, ```fy6900```, ```fy6600```, ```ad9910```, ```dg800```, ```dg800P```, ```utg900e```, ```utg1000x``` or ```dummy```. The ```dummy``` generator was added for running this program without connecting a signal generator. The program will emulate a Siglent AWG and the oscilloscope will generate a Bode plot but no commands will be sent to the AWG.
 
 * ```<port>``` is the port to which your AWG is connected. The type depends on your AWG, see the explanations above.
 
   For serial port AWGs, it will be something like ```/dev/ttyUSB0``` or ```/dev/ttyACM0```.
 
-  If you use one of the SCPI compatible devices like the ```dg800``` or ```utg1000x```, you must specify a Visa compatible connection string, like ```TCPIP::192.168.001.204::INSTR``` or ```USB0::9893::6453::DG1234567890A::0::INSTR```
+  If you use one of the SCPI compatible devices like the ```dg800```,```dg800P``` or ```utg1000x```, you must specify a Visa compatible connection string, like ```TCPIP::192.168.001.204::INSTR``` or ```USB0::9893::6453::DG1234567890A::0::INSTR```
 
   If you use the ```dummy``` generator, you don't have to specify the port. 
 
@@ -184,6 +188,10 @@ This is possible, but you should set a large timeout on your ```Instrument``` or
 
 ## Changelog
 
+### 2025-06-04
+
+* added Rigol DG800 Pro driver
+
 ### 2025-01-23
 
 * added utg900e driver
@@ -248,6 +256,8 @@ This is possible, but you should set a large timeout on your ```Instrument``` or
 * **alfredfo** - driver for Uni-Trend UTG1000x.
 
 * **3tch-a-sketch** - generic Feeltech FY driver.
+
+* **JohnKr** - driver for Rigol DG800 Pro.
 
 ## Links
 

@@ -14,6 +14,7 @@ from awgdrivers.fy6900 import Fy6900AWG
 from awgdrivers.fy6600 import FY6600
 from awgdrivers.ad9910 import AD9910
 from awgdrivers.dg800 import RigolDG800
+from awgdrivers.dg800P import RigolDG800P
 from awgdrivers.utg1000x import UTG1000x
 from awgdrivers.utg900e import UTG900e
 
@@ -47,6 +48,7 @@ drivers = (
     FY6600,
     AD9910,
     RigolDG800,
+    RigolDG800P,
     UTG1000x,
     UTG900e
 )
