@@ -31,7 +31,7 @@ class RigolDG800P(BaseAWG):
     DG800/DG900 Pro waveform generator driver.
     '''
 
-    SHORT_NAME = "dg800P"
+    SHORT_NAME = "dg800p"
 
     def __init__(self, port: str = "", baud_rate: int = None, timeout: int = TIMEOUT, log_debug: bool = False):
         """baud_rate parameter is ignored."""

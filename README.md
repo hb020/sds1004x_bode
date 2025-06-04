@@ -82,31 +82,42 @@ If you have an old python version, you may also need to upgrade the ```typing_ex
 
 You should not need to install any other VISA drivers.
 
-## Running The Program
-
-The source code is located in the [```sds1004x_bode```](/sds1004x_bode) directory of this repository.
-
 Under Linux, Python ```sockets``` requires elevated privileges, therefore the program has to be run with ```su``` or ```sudo```, or better, allow python access with a command like ```sudo setcap 'CAP_NET_BIND_SERVICE+ep' /bin/python3.10``` (to be adapted to your situation). On MacOS and Windows you likely will not need all this.
 
-The program must be run in a command line terminal. The file to be run is ```bode.py```. In order to run it, change the current path to the directory where you downloaded the source code. Then write the following command:
+## Running The Program
 
-```python bode.py <awg_name> [<port>] [<baud_rate>] [-h] [-v[v[v]]]```
+The program must be run in a command line terminal.
+
+In order to run it, change the current path to the directory where you downloaded the source code. Then write the following command:
+
+```sh
+python3 sds1004x_bode <awg_name> [<port>] [<baud_rate>] [-h] [-v[v[v]]] [-1]
+```
+
+or (legacy form):
+
+```sh
+cd sds1004x_bode
+python3 bode.py <awg_name> [<port>] [<baud_rate>] [-h] [-v[v[v]]] [-1]
+```
 
 where
 
-* ```<awg_name>``` is the name of the AWG connected to your PC:  ```jds6600```, ```bk4075```, ```fy```, ```fy6900```, ```fy6600```, ```ad9910```, ```dg800```, ```dg800P```, ```utg900e```, ```utg1000x``` or ```dummy```. The ```dummy``` generator was added for running this program without connecting a signal generator. The program will emulate a Siglent AWG and the oscilloscope will generate a Bode plot but no commands will be sent to the AWG.
+* ```<awg_name>``` is the name of the AWG connected to your PC:  ```jds6600```, ```bk4075```, ```fy```, ```fy6900```, ```fy6600```, ```ad9910```, ```dg800```, ```dg800p```, ```utg900e```, ```utg1000x``` or ```dummy```. The ```dummy``` generator was added for running this program without connecting a signal generator. The program will emulate a Siglent AWG and the oscilloscope will generate a Bode plot but no commands will be sent to any AWG when using ```dummy```.
 
 * ```<port>``` is the port to which your AWG is connected. The type depends on your AWG, see the explanations above.
 
   For serial port AWGs, it will be something like ```/dev/ttyUSB0``` or ```/dev/ttyACM0```.
 
-  If you use one of the SCPI compatible devices like the ```dg800```,```dg800P``` or ```utg1000x```, you must specify a Visa compatible connection string, like ```TCPIP::192.168.001.204::INSTR``` or ```USB0::9893::6453::DG1234567890A::0::INSTR```
+  If you use one of the SCPI compatible devices like the ```dg800```,```dg800p``` or ```utg1000x```, you must specify a Visa compatible connection string, like ```TCPIP::192.168.001.204::INSTR``` or ```USB0::9893::6453::DG1234567890A::0::INSTR```
 
   If you use the ```dummy``` generator, you don't have to specify the port. 
 
 * ```<baud_rate>``` The serial baud rate as defined in the AWG settings. ```bk4075``` uses a default speed of 19200. All others run on 115200 baud or on Visa, and this parameter will be ignored for them.
 
 * Use ```-h``` for help text.
+
+* Use ```-1``` to exit the program after one bode plot is done. It looks for the "OUTP OFF" command or inactivity for more than 10 seconds after a start of a bode plot. If ```-1``` is not specified, the program will run until Ctrl-C is used.
 
 * Use ```-v``` or ```-vv``` or ```-vvv``` for logging verbosity. The first logs the driver info, the next also logs VXI-11 info, the last also logs port mapper info. By default, only the startup phase and the incoming commands are logged.
 
@@ -164,7 +175,7 @@ VXI-11 DESTROY_LINK, SCPI command: None
 VXI-11 moving to TCP port 9010
 ```
 
-When done, you can stop the process via Ctrl-C.
+When done, you can stop the process via Ctrl-C. You can also specify the parameter `-1` to stop the process once one bode plot is done .
 
 ## Some possible errors
 
@@ -191,6 +202,7 @@ This is possible, but you should set a large timeout on your ```Instrument``` or
 ### 2025-06-04
 
 * added Rigol DG800 Pro driver
+* added support for graceful exit after one bode plot (parameter ```-1```)
 
 ### 2025-01-23
 

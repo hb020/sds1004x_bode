@@ -26,6 +26,7 @@ if __name__ == '__main__':
                 inst = rm.open_resource(m, timeout=1000)
                 r = inst.query("*IDN?").strip()
                 print(f"Found \"{r}\" on address \"{m}\"")
+                inst.close()
             except:
                 print(f"Found unknown device on address \"{m}\"")
     else:
@@ -38,7 +39,8 @@ if __name__ == '__main__':
                 "IDN-SGLT-PRI?", 
                 "C1:OUTP LOAD,50;BSWV WVTP,SINE,PHSE,0,FRQ,50000,AMP,2.1,OFST,0;OUTP ON",
                 "C1:BSWV?",
-                "C1:BSWV FRQ,10"
+                "C1:BSWV FRQ,10",
+                "C1:OUTP OFF"
                 ]
         for m in msgs:
             if m.endswith("?"):

@@ -16,6 +16,7 @@ import multiprocessing
 import socket
 from awgdrivers.base_awg import BaseAWG
 from command_parser import CommandParser
+from enum import Enum
 
 # Host and ports to use.
 # Setting host to 0.0.0.0 will bind the incoming connections to any interface.
@@ -25,6 +26,7 @@ HOST = '0.0.0.0'
 RPCBIND_PORT = 111
 VXI11_PORTRANGE_START = 9010
 VXI11_PORTRANGE_END = 9019
+END_OF_SESSION_TIMEOUT = 10  # seconds
 
 
 # AWG ID to send to the oscilloscope
@@ -45,6 +47,16 @@ LXI_PROCEDURES = {
     23: "DESTROY_LINK"
 }
 
+
+class sessionType(Enum):
+    # Session types for the VXI-11 server
+    SESSION_ONGOING = 0
+    SESSION_STARTED = 1
+    SESSION_TIMEOUT = 2
+    SESSION_ENDED = 3
+    SESSION_ERROR = 4
+
+
 # VXI-11 Core (395183)
 VXI11_CORE_ID = 395183
 # Function responses
@@ -59,7 +71,7 @@ class CommsObject(object):
     Base class for the network interactions
     """
     
-    def create_socket(self, host: str, port: int, on_udp: bool, myname: str):
+    def create_socket(self, host: str, port: int, on_udp: bool, myname: str) -> socket.socket:
         """Create a UDP or TCP socket, and starts listening
 
         :param host: host
@@ -269,6 +281,7 @@ class Portmapper(CommsObject, multiprocessing.Process):
         if self.log_verbose:
             print(f"{self.myname}: terminate()")
         self.exit.set()
+        multiprocessing.Process.terminate(self)
            
     def validate_rpcbind_request(self, address, rx_data: bytes, on_udp: bool):
         """Validates a RPC bind request and generates tthe reply
@@ -378,7 +391,7 @@ class AwgServer(CommsObject):
 
     def __init__(self, awg, host: str = None, rpcbind_port: int = None, 
                  vxi11_portrange_start: int = None, vxi11_portrange_end: int = None, 
-                 log_VXI: bool = False, log_mapping: bool = False):
+                 log_VXI: bool = False, log_mapping: bool = False, runonce: bool = False):
         if host is not None:
             self.host = host
         else:
@@ -415,6 +428,7 @@ class AwgServer(CommsObject):
         self.pm2 = None
         self.log_VXI = log_VXI
         self.log_mapping = log_mapping
+        self.runonce = runonce
             
     def start(self):
         """
@@ -425,8 +439,10 @@ class AwgServer(CommsObject):
         
         if self.log_mapping:
             print(f"Portmapper: Listening to UDP and TCP ports on {self.host}:{self.rpcbind_port}")
-        self.pm1 = Portmapper(self.host, self.rpcbind_port, True, self.vxi11_port, self.log_mapping).start()
-        self.pm2 = Portmapper(self.host, self.rpcbind_port, False, self.vxi11_port, self.log_mapping).start()
+        self.pm1 = Portmapper(self.host, self.rpcbind_port, True, self.vxi11_port, self.log_mapping)
+        self.pm1.start()
+        self.pm2 = Portmapper(self.host, self.rpcbind_port, False, self.vxi11_port, self.log_mapping)
+        self.pm2.start()
         # Create VXI-11 socket
         if self.log_mapping:
             print(f"{self.myname}: Listening to TCP port {self.host}:{self.vxi11_port.value}")
@@ -444,13 +460,28 @@ class AwgServer(CommsObject):
         """
 
         # Run the VXI-11 server
+        session_started = False
         while True:
             # if self.log_mapping:
             #     print("Waiting for LXI request.")
-            self.process_lxi_requests()
+            
+            timeout = 0
+            if session_started:
+                timeout = END_OF_SESSION_TIMEOUT
+            session_result = self.process_lxi_requests(timeout)
+            if self.runonce and session_result == sessionType.SESSION_STARTED:
+                if self.log_mapping:
+                    print(f"{self.myname}: Session started.")
+                session_started = True
             
             # every request must go to a new socket (as SDS800X-HD requires)
             self.close_lxi_sockets()
+            if session_result == sessionType.SESSION_ERROR:
+                # If there was an error, we can stop the server
+                if self.log_mapping:
+                    print(f"{self.myname}: Session ended with an error. Stopping server.")
+                break
+            
             self.vxi11_port.value += 1
             if self.vxi11_port.value > self.vxi11_portrange_end:
                 self.vxi11_port.value = self.vxi11_portrange_start
@@ -458,13 +489,37 @@ class AwgServer(CommsObject):
             if self.log_mapping:
                 print(f"{self.myname}: moving to TCP port {self.vxi11_port.value}")
             self.lxi_socket = self.create_socket(self.host, self.vxi11_port.value, False, self.myname)
+
+            if self.runonce and session_result in (sessionType.SESSION_ENDED, sessionType.SESSION_TIMEOUT):
+                # If we run only once, and the session is ended, we can stop the server
+                if self.log_mapping:
+                    print(f"{self.myname}: Session ended. Stopping server.")
+                break
             
         # This code will never be reached
         # Disconnect from the external AWG
         self.awg.disconnect()
 
-    def process_lxi_requests(self):
-        connection, address = self.lxi_socket.accept()
+    def process_lxi_requests(self, timeout: int = 0) -> sessionType:
+        # Will the type of session we just handled
+        # The start of the session is indicated by the CREATE_LINK request,
+        # The end of the session is indicated by the DESTROY_LINK request, after an "OUTP OFF" command
+        start_of_session = False
+        end_of_session = False
+        if timeout > 0:
+            self.lxi_socket.settimeout(10.0)  # Set a timeout for the socket to avoid blocking indefinitely
+        else:
+            self.lxi_socket.settimeout(None)
+        try:
+            connection, address = self.lxi_socket.accept()  # type: ignore
+        except socket.timeout:
+            # If no connection is received within the timeout, return to the main loop
+            return sessionType.SESSION_TIMEOUT
+        except socket.error as e:
+            # If there is a socket error, print it and return to the main loop
+            if self.log_VXI:
+                print(f"{self.myname}: Socket error: {e}")
+            return sessionType.SESSION_ERROR
         while True:
             rx_buf = connection.recv(255)
             if len(rx_buf) > 0:
@@ -494,6 +549,14 @@ class AwgServer(CommsObject):
                     The parser parses and executes the received SCPI command.
                     VXI-11 DEVICE_WRITE function requires an empty reply.
                     """
+                    if scpi_command is None:
+                        scpi_command = ""
+                    if "outp off" in scpi_command.lower():
+                        # If the command is OUTP OFF, we should end the session
+                        end_of_session = True
+                    if "outp on" in scpi_command.lower():
+                        # If the command is OUTP ON, we have the start of the session
+                        start_of_session = True                    
                     self.parser.parse_scpi_command(scpi_command)
                     resp = self.generate_lxi_device_write_response(cmd_length)
 
@@ -545,6 +608,13 @@ class AwgServer(CommsObject):
 
         # Close connection
         connection.close()
+        if end_of_session:
+            return sessionType.SESSION_ENDED
+        elif start_of_session:
+            return sessionType.SESSION_STARTED
+        else:
+            return sessionType.SESSION_ONGOING
+
 
     def parse_lxi_request(self, rx_data):
         """Parses VXI-11 request. Returns VXI-11 command code and SCPI command if it exists.
@@ -558,7 +628,7 @@ class AwgServer(CommsObject):
         #  If the request doesn't come from VXI-11 Core (395183), it is ignored.
         program_id = self.bytes_to_uint(rx_data[0x10:0x14])
         if program_id != VXI11_CORE_ID:
-            return (NOT_VXI11_ERROR, None, None)
+            return (NOT_VXI11_ERROR, None, None, 0)
 
         # Procedure: CREATE_LINK (10), DESTROY_LINK (23), DEVICE_WRITE (11), DEVICE_READ (12)
         vxi11_procedure = self.bytes_to_uint(rx_data[0x18:0x1c])
@@ -639,16 +709,28 @@ class AwgServer(CommsObject):
         Closes VXI-11 socket.
         """
         try:
-            self.lxi_socket.close()
+            if self.lxi_socket:
+                if self.log_VXI:
+                    print(f"{self.myname}: Closing LXI socket.")        
+                self.lxi_socket.close()
+                self.lxi_socket = None
         except:
+            if self.log_VXI:
+                print(f"{self.myname}: Closing LXI socket failed.")        
             pass
 
     def close_sockets(self):
+        if self.log_VXI:
+            print(f"{self.myname}: Closing all sockets.")           
         self.close_lxi_sockets()
         if self.pm1:
             self.pm1.terminate()
+            del self.pm1
+            self.pm1 = None
         if self.pm2:
             self.pm2.terminate()
+            del self.pm2
+            self.pm2 = None
         
     def __del__(self):
         self.close_sockets()
