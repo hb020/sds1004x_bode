@@ -35,7 +35,7 @@ class PSG9080(BaseAWG):
     '''
     PSG9080 function generator driver.
     '''
-    SHORT_NAME = "PSG9080"
+    SHORT_NAME = "psg9080"
 
     def __init__(self, port: str = "", baud_rate: int = BAUD_RATE, timeout: int = TIMEOUT, log_debug: bool = False):
         """baud_rate parameter is ignored."""
@@ -114,17 +114,17 @@ class PSG9080(BaseAWG):
         if channel is not None and channel not in CHANNELS:
             raise UnknownChannelError(CHANNELS_ERROR)
 
-        freq_str = "%.2f" % freq
+        freq_str = "%.2f" % (freq * 10)
         freq_str = freq_str.replace(".", "")
 
         # Channel 1
         if channel in (0, 1) or channel is None:
-            cmd = ":w13=%s,0." % freq_str
+            cmd = ":w13=%s,1." % freq_str
             self._send_command(cmd)
 
         # Channel 2
         if channel in (0, 2) or channel is None:
-            cmd = ":w14=%s,0." % freq_str
+            cmd = ":w14=%s,1." % freq_str
             self._send_command(cmd)
 
     def set_phase(self, channel: int, phase: float):
