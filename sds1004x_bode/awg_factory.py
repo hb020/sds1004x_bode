@@ -7,6 +7,7 @@ Update of original file on Nov. 17 2018 by Dundarave to add entries needed for F
 '''
 
 from awgdrivers.dummy_awg import DummyAWG
+from awgdrivers.psg9080 import PSG9080
 from awgdrivers.jds6600 import JDS6600
 from awgdrivers.bk4075 import BK4075
 from awgdrivers.fy import FygenAWG
@@ -41,6 +42,7 @@ class AwgFactory(object):
 awg_factory = AwgFactory()
 drivers = (
     DummyAWG,
+    PSG9080,
     JDS6600,
     BK4075,
     FygenAWG,
