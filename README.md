@@ -18,7 +18,7 @@ The current version of the program was tested under Linux and MacOS only. It wil
 
 ## Supported AWG Models
 
-As of January 2025 the program supports the following models:
+Right now the program supports the following models:
 
 * **Uni-Trend UTG1000X (like the UTG1022X)** This is a 2 channel 20 or 40MHz AWG. It connects to the PC via USB, and talks a dialect of the SCPI 1992.0 standard. There may be other devices that use this same dialect, so you may be able to use this driver for other AWGs, especially those from Uni-T.
 
