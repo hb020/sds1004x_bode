@@ -42,7 +42,11 @@ As of January 2025 the program supports the following models:
 
   ```port``` must be a serial port. You must also provide ```baud_rate``` if you use another speed than 19200. See below.
 
-* **RD JDS6600** Chinese generator which is widely sold on eBay and AliExpress. This driver may also work on others from the same series, like the JDS2900.
+* **RD/JOY-IT JDS6600** Chinese generator which is widely sold on eBay and AliExpress. This driver may also work on others from the same series, like the JDS2900.
+
+  ```port``` must be a serial port. See below.
+
+* **JunTek/JOY-IT PSG9080** Another Chinese generator. This driver might also work with the PSG9080B and PSG9060.
 
   ```port``` must be a serial port. See below.
 
@@ -103,7 +107,7 @@ python3 bode.py <awg_name> [<port>] [<baud_rate>] [-h] [-v[v[v]]] [-1]
 
 where
 
-* ```<awg_name>``` is the name of the AWG connected to your PC:  ```jds6600```, ```bk4075```, ```fy```, ```fy6900```, ```fy6600```, ```ad9910```, ```dg800```, ```dg800p```, ```utg900e```, ```utg1000x``` or ```dummy```. The ```dummy``` generator was added for running this program without connecting a signal generator. The program will emulate a Siglent AWG and the oscilloscope will generate a Bode plot but no commands will be sent to any AWG when using ```dummy```.
+* ```<awg_name>``` is the name of the AWG connected to your PC: ```psg9080```, ```jds6600```, ```bk4075```, ```fy```, ```fy6900```, ```fy6600```, ```ad9910```, ```dg800```, ```dg800p```, ```utg900e```, ```utg1000x``` or ```dummy```. The ```dummy``` generator was added for running this program without connecting a signal generator. The program will emulate a Siglent AWG and the oscilloscope will generate a Bode plot but no commands will be sent to any AWG when using ```dummy```.
 
 * ```<port>``` is the port to which your AWG is connected. The type depends on your AWG, see the explanations above.
 
@@ -198,6 +202,10 @@ For driver testing, you can use [```awg_tests.py```](/sds1004x_bode/tests/awg_te
 This is possible, but you should set a large timeout on your ```Instrument``` or when using ```open_resource()``` when using serial AWGs. See the example in [```testSCPI.py```](/sds1004x_bode/tests/testSCPI.py)
 
 ## Changelog
+
+### 2025-08-11
+
+* added JunTek/JOY-IT PSG9080 driver
 
 ### 2025-06-04
 

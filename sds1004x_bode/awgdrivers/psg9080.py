@@ -3,7 +3,7 @@ Created on August 11, 2025
 
 @author: 4x1md, modified by nmeurer
 
-Driver for PSG9080 AWG
+Driver for PSG9080 AWG. This driver is very much like the JDS6600 driver.
 '''
 
 import serial
