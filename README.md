@@ -10,7 +10,7 @@ Can also be used as a regular VXI-11 front-end for the supported AWGs, without t
 
 At a certain point after getting the SDS1204X-E oscilloscope I started to wonder if it might be possible to use the Bode plot function with a non-Siglent waveform generator. After some hours of researching and reverse engineering I wrote this Python program which is a small server which emulates Siglent arbitrary waveform generator.
 
-The oscilloscope connects using LAN to a PC running this program. The program makes the oscilloscope think that it communicates with a genuine Siglent signal generator. The program extracts the commands sent to the generator, parses them and translates to the command set, which can be understood by the connected to the PC non-Siglent generator.
+The oscilloscope connects using LAN to a PC running this program. The program makes the oscilloscope think that it communicates with a genuine Siglent signal generator. The program extracts the oscilloscope's commands, translates them to the language used by the target AWG, and then sends them to the AWG.
 
 This tool can also be used to control the supported AWGs via other VISA tools, independently of a Siglent scope. It supports discovery over the network.
 
@@ -22,55 +22,57 @@ Right now the program supports the following models:
 
 * **Uni-Trend UTG1000X (like the UTG1022X)** This is a 2 channel 20 or 40MHz AWG. It connects to the PC via USB, and talks a dialect of the SCPI 1992.0 standard. There may be other devices that use this same dialect, so you may be able to use this driver for other AWGs, especially those from Uni-T.
 
-  ```port``` must be a Visa compatible connection string. See below.
+  ```<awg_name>``` must be ```utg1000x```,  ```<port>``` must be a Visa compatible connection string. See below.
 
 * **Uni-Trend UTG900E (like the UTG932E)** This is a 2 channel 30 or 60MHz AWG. It connects to the PC via USB, and talks a dialect of the SCPI 1992.0 standard, that is very much like the UTG1000X series, but has less error checking in it, so this might be the driver to use when you have older Uni-T devices.
 
-  ```port``` must be a Visa compatible connection string. See below.
+  ```<awg_name>``` must be ```utg900e```,  ```<port>``` must be a Visa compatible connection string. See below.
 
 * **Rigol DG800/DG900/DG1000Z series (like the DG811..DG992 and DG1062Z)**. (Not suitable for the Pro series, see below) When "liberated", those are  2 channel up to 100MHz AWGs with USB and ethernet interface [^1], that talks a dialect of the SCPI 1992.0 standard. There may be other devices that use this same dialect, so you may be able to use this driver for other AWGs.
 
-  ```port``` must be a Visa compatible connection string, be it USB or ethernet. See below.
+  ```<awg_name>``` must be ```dg800```,  ```<port>``` must be a Visa compatible connection string, be it USB or ethernet. See below.
 
     [^1]: On the DG800/DG900, the ethernet interface requires a suitable adapter. It is however strongly recommended to use this interface.
 
 * **Rigol DG800/DG900 Pro series**. Newer version of the above.
 
-  ```port``` must be a Visa compatible connection string, be it USB or ethernet. See below.
+  ```<awg_name>``` must be ```dg800p```,  ```<port>``` must be a Visa compatible connection string, be it USB or ethernet. See below.
 
-* **BK Precision BK4075** One channel 25MHz AWG. It uses a serial driver, but you might also be able to get this AWG working via a visa driver.
+* **BK Precision BK4075** One channel 25MHz AWG. It connects to the PC via USB. It uses a serial driver, but you might also be able to get this AWG working via a visa driver.
 
-  ```port``` must be a serial port. You must also provide ```baud_rate``` if you use another speed than 19200. See below.
+  ```<awg_name>``` must be ```bk4075```,  ```<port>``` must be a serial port. You must also provide ```baud_rate``` if you use another speed than 19200. See below.
 
-* **RD/JOY-IT JDS6600** Chinese generator which is widely sold on eBay and AliExpress. This driver may also work on others from the same series, like the JDS2900.
+* **RD/JOY-IT JDS6600** This is a 2 channel AWG that is available in various bandwidths (15 to 60 MHz). It connects to the PC via USB. This driver may also work on others from the same series, like the JDS2900.
 
-  ```port``` must be a serial port. See below.
+  ```<awg_name>``` must be ```jds6600```,  ```<port>``` must be a serial port. See below.
 
-* **JunTek/JOY-IT PSG9080** Another Chinese generator. This driver might also work with the PSG9080B and PSG9060.
+* **JunTek/JOY-IT PSG9080** This is a 2 channel 80MHz AWG. It connects to the PC via USB. This driver might also work with the PSG9080B and PSG9060.
 
-  ```port``` must be a serial port. See below.
+  ```<awg_name>``` must be ```psg9080```,  ```<port>``` must be a serial port. See below.
 
-* **Feeltech FYxxxx** A range of Chinese generators. This driver is a newer driver that has some improvements over the older FY6600 driver, and supports FY2300, FY6600, FY6800, the older FY6900 and probably more.
+* **Feeltech FYxxxx** A range of AWGs available in various bandwidths. It connects to the PC via USB. This driver is a newer driver that has some improvements over the older FY6600 driver, and supports FY2300, FY6600, FY6800, the older FY6900 and probably more.
 
-  ```port``` must be a serial port. See below.
+  ```<awg_name>``` must be ```fy```,  ```<port>``` must be a serial port. See below.
 
-* **Feeltech FY6900** A Chinese generator. This driver has some improvements that are needed for the later FY6900 versions, that require the frequency to be sent as Hz instead of uHz. For the rest it is the same driver as the generic FY driver.
+* **Feeltech FY6900** This is a 2 channel AWG that is available in various bandwidths (20 to 100 MHz). It connects to the PC via USB. This driver has some improvements that are needed for the later FY6900 versions, that require the frequency to be sent as Hz instead of uHz. For the rest, it is the same driver as the generic FY driver.
 
-  ```port``` must be a serial port. See below.
+  ```<awg_name>``` must be ```fy6900```,  ```<port>``` must be a serial port. See below.
 
-* **Feeltech FY6600** Another Chinese generator which is widely sold on eBay and AliExpress. This is an older driver that has less checking. Use it when the above drivers do not work. This will however mean that some changes to the above drivers might be needed.
+* **Feeltech FY6600** This is a 2 channel AWG that is available in various bandwidths (15 to 60 MHz). It connects to the PC via USB. This is an older driver that has less checking. Use it when the above drivers do not work. This will however mean that some changes to the above drivers might be needed.
 
-  ```port``` must be a serial port. See below.
+  ```<awg_name>``` must be ```fy6600```,  ```<port>``` must be a serial port. See below.
 
 * **AD9910 Arduino Shield** [DDS AD9910 Shield](https://gra-afch.com/catalog/rf-units/dds-ad9910-arduino-shield/).
 
-  ```port``` must be a serial port. See below.
+  ```<awg_name>``` must be ```ad9910```,  ```<port>``` must be a serial port. See below.
 
 ## Oscilloscope Configuration
 
-Before starting the program you have to tell the oscilloscope how to connect to the waveform generator. Connect your oscilloscope to the same network where your PC is connected. Then go to ```Configure => AWG I/O``` in the Bode plot settings. Define LAN connection and the IP addres of your PC as the AWG IP. Please keep ```Amplitude Unit``` to ```Vpp```. This program does not (yet) support other units.
+Before starting the program, you have to tell the oscilloscope how to connect to the waveform generator. Connect your oscilloscope to the same network where your PC is connected. Then go to ```Configure => AWG I/O``` in the Bode plot settings. Define LAN connection and the IP addres of your PC as the AWG IP. Please keep ```Amplitude Unit``` to ```Vpp```. This program does not (yet) support other units.
 
-When you start the program, it will automatically test the communication between the PC and the AWG, and start the AWG server on the PC. Once the program is up and running, you can press the ```Test Connection``` button on the oscilloscope to test the communication between the oscilloscope and the PC.
+When you start the program, it will first test the communication between the PC and the configured AWG, and then starts listening to any oscilloscope or VISA commands. If you want to 'dry test', use the ```dummy``` AWG driver.
+
+Once the program is up and running, you can press the ```Test Connection``` button on the oscilloscope to test the communication between the oscilloscope and the PC.
 
 ## Requirements
 
@@ -107,7 +109,9 @@ python3 bode.py <awg_name> [<port>] [<baud_rate>] [-h] [-v[v[v]]] [-1]
 
 where
 
-* ```<awg_name>``` is the name of the AWG connected to your PC: ```psg9080```, ```jds6600```, ```bk4075```, ```fy```, ```fy6900```, ```fy6600```, ```ad9910```, ```dg800```, ```dg800p```, ```utg900e```, ```utg1000x``` or ```dummy```. The ```dummy``` generator was added for running this program without connecting a signal generator. The program will emulate a Siglent AWG and the oscilloscope will generate a Bode plot but no commands will be sent to any AWG when using ```dummy```.
+* ```<awg_name>``` is the name of the AWG connected to your PC: ```psg9080```, ```jds6600```, ```bk4075```, ```fy```, ```fy6900```, ```fy6600```, ```ad9910```, ```dg800```, ```dg800p```, ```utg900e```, ```utg1000x``` or ```dummy```.
+  
+  If you do not specify ```<awg_name>```, the program will use the ```dummy``` configuration: this can be used to test communication with the oscilloscope. The program will then emulate a Siglent AWG and the oscilloscope will generate a Bode plot but no commands will be sent to any AWG.
 
 * ```<port>``` is the port to which your AWG is connected. The type depends on your AWG, see the explanations above.
 
@@ -115,7 +119,7 @@ where
 
   If you use one of the SCPI compatible devices like the ```dg800```,```dg800p``` or ```utg1000x```, you must specify a Visa compatible connection string, like ```TCPIP::192.168.001.204::INSTR``` or ```USB0::9893::6453::DG1234567890A::0::INSTR```
 
-  If you use the ```dummy``` generator, you don't have to specify the port. 
+  If you use the ```dummy``` generator, you don't have to specify the port.
 
 * ```<baud_rate>``` The serial baud rate as defined in the AWG settings. ```bk4075``` uses a default speed of 19200. All others run on 115200 baud or on Visa, and this parameter will be ignored for them.
 
@@ -185,7 +189,7 @@ When done, you can stop the process via Ctrl-C. You can also specify the paramet
 
 If you get an error message with  ```Address already in use. Cannot use ... for listening.```, use ```netstat``` or ```lsof``` to look what process is already using the port. It might be because you have nfs.server running via rpcbind. For that case, just disable it while running the bode plot: ```sudo systemctl stop rpcbind.socket rpcbind.service```.
 
-If you see a warning message with `VI_WARN_CONFIG_NLOADED`, that probably means you have installed a lower level VISA driver, and have not provided a config file for it. Know that it is unlikely that you'd need a VISA driver (apart from the python packages). So in order to suppress the warning message, either add the config file (sorry, that depends on the driver you installed, too many variants out there), or better, remove the VISA driver, unless you need that driver with other tools.
+If you see a warning message with `VI_WARN_CONFIG_NLOADED`, that probably means you have installed a lower level VISA driver, and have not provided a config file for it. Know that it is unlikely that you'd need a VISA driver (apart from the above mentioned python packages). So in order to suppress the warning message, either add the config file (sorry, that depends on the driver you installed, too many variants out there), or better, remove the VISA driver, unless you need that driver with other tools.
 
 ## Support for other AWGs and Contributing
 
