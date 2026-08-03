@@ -6,6 +6,10 @@ Created on May 4, 2018
 
 from awgdrivers import constants
 
+# AWG ID to send to the oscilloscope
+#  Examples: SDG SDG2042X SDG0000X SDG2000X
+#  The ID should begin with SDG letters.
+AWG_ID_STRING = b"IDN-SGLT-PRI SDG0000X"
 
 class CommandParser(object):
     """
@@ -19,7 +23,7 @@ class CommandParser(object):
         """
         self.awg = awg
 
-    def parse_scpi_command(self, line):
+    def parse_scpi_command(self, line) -> bytes:
         """
         Parses the commands send by the oscilloscope and sends them to the AWG.
 
@@ -35,7 +39,12 @@ class CommandParser(object):
         """
         print(f"> {line}")
         if line.endswith("?"):
-            return
+            if line.upper() == "*IDN?":
+                return AWG_ID_STRING
+            if line.upper().endswith(":ERR?") or line.upper().endswith(":ERROR?"):
+                return b"+0,\"No error\""
+            
+            return AWG_ID_STRING
 
         try:
             channel = int(line[1])
@@ -51,8 +60,10 @@ class CommandParser(object):
 
                 elif token == "OUTP":
                     self.parse_outp(args, channel)
+            return bytes()  # empty
         except Exception as e:
             print(f"Error parsing command \"{line}\": \"{e}\". Ignoring command.")
+            return bytes()  # empty
 
     def parse_bswv(self, args, channel):
         """

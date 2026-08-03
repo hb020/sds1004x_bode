@@ -242,6 +242,10 @@ This is possible, but you should set a large timeout on your ```Instrument``` or
 
 ## Changelog
 
+### 2026-08-03
+
+* made VXI stack slightly more compliant, in preparation for new pyvisa-py version that is implicitly harsher on VXI-11 compliance.
+
 ### 2026-05-01
 
 * added autodetect of VISA instruments with ```visadetect``` option. This is useful if you don't know the VISA connection string to use for your AWG.

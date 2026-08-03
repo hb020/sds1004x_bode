@@ -29,11 +29,6 @@ VXI11_PORTRANGE_END = 9019
 END_OF_SESSION_TIMEOUT = 10  # seconds
 
 
-# AWG ID to send to the oscilloscope
-#  Examples: SDG SDG2042X SDG0000X SDG2000X
-#  The ID should begin with SDG letters.
-AWG_ID_STRING = b"IDN-SGLT-PRI SDG0000X"
-
 # RPC/VXI-11 procedure ids
 GET_PORT = 3
 CREATE_LINK = 10
@@ -397,6 +392,8 @@ class AwgServer(CommsObject):
         else:
             self.host = HOST
         self.change_ports = change_ports
+        
+        self.next_reply = None
 
         if not isinstance(rpcbind_port, (int, type(None))):
             raise TypeError("rpcbind_port must be an integer.")
@@ -560,10 +557,9 @@ class AwgServer(CommsObject):
                 elif status == UNKNOWN_COMMAND_ERROR:
                     if self.log_VXI:
                         print("Unknown VXI-11 request received. Procedure id %s" % (vxi11_procedure))
-                    break
-
-                if self.log_VXI:
-                    print("VXI-11 %s, SCPI command: %s" % (LXI_PROCEDURES[vxi11_procedure], scpi_command))
+                else:
+                    if self.log_VXI:
+                        print("VXI-11 %s, SCPI command: %s" % (LXI_PROCEDURES[vxi11_procedure], scpi_command))
 
                 # Process the received VXI-11 request
                 if vxi11_procedure == CREATE_LINK:
@@ -582,7 +578,9 @@ class AwgServer(CommsObject):
                     if "outp on" in scpi_command.lower():
                         # If the command is OUTP ON, we have the start of the session
                         start_of_session = True                    
-                    self.parser.parse_scpi_command(scpi_command)
+                    r = self.parser.parse_scpi_command(scpi_command)
+                    if r is not None and len(r) > 0:
+                        self.next_reply = r
                     resp = self.generate_lxi_device_write_response(cmd_length)
 
                 elif vxi11_procedure == DEVICE_READ:
@@ -603,7 +601,7 @@ class AwgServer(CommsObject):
                         It makes our life easy and we send AWG ID as reply
                         to any DEVICE_READ request.
                     """
-                    resp = self.generate_lxi_idn_response(AWG_ID_STRING)
+                    resp = self.generate_lxi_idn_response(self.next_reply)
 
                 elif vxi11_procedure == DESTROY_LINK:
                     """
@@ -613,15 +611,14 @@ class AwgServer(CommsObject):
                     All we have to do is to exit the loop and continue listening to
                     RPCBIND requests.
                     """
-                    resp = self.generate_lxi_destroy_link_response()
+                    resp = self.generate_lxi_basic_response()
 
                 else:
                     """
                     If the received command is none of the above, something
-                    went wrong and we should exit the loop and continue
-                    listening to RPCBIND requests.
+                    went wrong. Just answer with the basic reply (that is, no error)
                     """
-                    break
+                    resp = self.generate_lxi_basic_response()
 
                 # Generate and send response
                 xid = self.get_xid(rx_buf[0x04:])
@@ -674,8 +671,6 @@ class AwgServer(CommsObject):
             pass
         else:
             status = UNKNOWN_COMMAND_ERROR
-            if self.log_VXI:
-                print("Unknown VXI-11 command received. Code %s" % (vxi11_procedure))
 
         if scpi_command is not None:
             scpi_command = scpi_command.decode('utf-8').strip()
@@ -699,8 +694,8 @@ class AwgServer(CommsObject):
         resp += b"\x00\x80\x00\x00"
         return resp
     
-    def generate_lxi_destroy_link_response(self):
-        """Generates reply to VXI-11 DESTROY_LINK request."""
+    def generate_lxi_basic_response(self):
+        """Generates basic reply to VXI-11 requests when no error occurred."""
         # VXI-11 response
         #  Error Code: No Error (0)
         resp = b"\x00\x00\x00\x00"
