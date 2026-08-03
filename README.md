@@ -240,6 +240,10 @@ For driver testing, you can use [```awg_tests.py```](/sds1004x_bode/tests/awg_te
 
 This is possible, but you should set a large timeout on your ```Instrument``` or when using ```open_resource()``` when using serial AWGs. See the example in [```testSCPI.py```](/sds1004x_bode/tests/testSCPI.py)
 
+## Using with esp-link 
+
+For some pointers on how to use this software with a USB AWG that you want to control via WiFi, see [here](https://www.eevblog.com/forum/testgear/siglent-sds1104x-e-and-sds1204x-e-bode-plot-with-non-siglent-awg/msg6276494/#msg6276494). Credit goes to Kimera.
+
 ## Changelog
 
 ### 2026-08-03
