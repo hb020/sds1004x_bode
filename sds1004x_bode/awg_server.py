@@ -616,9 +616,9 @@ class AwgServer(CommsObject):
                 else:
                     """
                     If the received command is none of the above, something
-                    went wrong. Just answer with the basic reply (that is, no error)
+                    went wrong. Just answer with the basic error reply (that is, not supported)
                     """
-                    resp = self.generate_lxi_basic_response()
+                    resp = self.generate_lxi_basic_error_response()
 
                 # Generate and send response
                 xid = self.get_xid(rx_buf[0x04:])
@@ -699,6 +699,13 @@ class AwgServer(CommsObject):
         # VXI-11 response
         #  Error Code: No Error (0)
         resp = b"\x00\x00\x00\x00"
+        return resp
+    
+    def generate_lxi_basic_error_response(self):
+        """Generates basic reply to VXI-11 requests when an error occurred."""
+        # VXI-11 response
+        #  Error Code: Operation not supported
+        resp = b"\x00\x00\x00\x08"
         return resp
 
     def generate_lxi_device_write_response(self, cmd_length):
