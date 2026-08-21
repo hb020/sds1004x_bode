@@ -543,7 +543,12 @@ class AwgServer(CommsObject):
                 print(f"{self.myname}: Socket error: {e}")
             return sessionType.SESSION_ERROR
         while True:
-            rx_buf = connection.recv(255)
+            try:
+                rx_buf = connection.recv(255)
+            except socket.error as e:
+                if self.log_VXI:
+                    print(f"{self.myname}: Socket error while receiving data: {e}")
+                break
             if len(rx_buf) > 0:
                 resp = b''  # default
                 

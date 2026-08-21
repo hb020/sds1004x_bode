@@ -246,9 +246,10 @@ For some pointers on how to use this software with a USB AWG that you want to co
 
 ## Changelog
 
-### 2026-08-03
+### 2026-08-21
 
 * made VXI stack slightly more compliant, in preparation for new pyvisa-py version that is implicitly harsher on VXI-11 compliance.
+* more robust connection handling
 
 ### 2026-05-01
 
