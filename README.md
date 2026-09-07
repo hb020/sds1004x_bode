@@ -229,7 +229,7 @@ If you get an error message with  ```Address already in use. Cannot use ... for 
 If you see a warning message with `VI_WARN_CONFIG_NLOADED`, that probably means you have installed a VISA driver (like NI-VISA or Keysight or..), and have not provided a config file for it. This program does not need a VISA driver, since PyVISA-py is installed. So in order to suppress the warning message, either:
 
 * add the config file (sorry, that depends on the driver you installed, too many variants out there)
-* ise ```-py``` to force the loading of PyVISA-py.
+* use ```-py``` to force the loading of PyVISA-py.
 * remove the VISA driver, unless you need that driver with other tools.
 
 ## Support for other AWGs and Contributing
