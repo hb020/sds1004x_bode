@@ -59,14 +59,16 @@ class AG33500B(BaseAWG):
     - Double channel output
     """
 
-    def __init__(self, port: str = "", baud_rate: int = 0, timeout: int = TIMEOUT, log_debug: bool = False):
+    def __init__(self, port: str = "", baud_rate: int = 0, 
+                 timeout: int = TIMEOUT, log_debug: bool = False, 
+                 force_pyvisa_py: bool = False):
         """
         port: AWG connection string.
         baud_rate: Ignored.
         timeout: GPIB timeout in milliseconds
         log_debug: Enable debug logging
         """
-        super().__init__(log_debug=log_debug)
+        super().__init__(log_debug=log_debug, force_pyvisa_py=force_pyvisa_py)
         self.printdebug("init")
         self.port = port
         self.rm = None
@@ -84,7 +86,7 @@ class AG33500B(BaseAWG):
         try:
             # Create LXI connection via connection string
             self.printdebug(f"Connecting to '{self.port}'...")
-            self.rm = visa.ResourceManager()
+            self.rm = visa.ResourceManager("@py" if self.force_pyvisa_py else "")
             self.m = self.rm.open_resource(self.port)
             self.m.timeout = self.timeout * 1000
             self.printdebug(f"Connected to '{self.port}' successfully.")

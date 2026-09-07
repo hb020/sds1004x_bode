@@ -44,7 +44,8 @@ class HP8116A(BaseAWG):
     SHORT_NAME = "hp8116a"
 
     def __init__(self, port: str, 
-                 baud_rate: int = 0, timeout: int = TIMEOUT, log_debug: bool = False):
+                 baud_rate: int = 0, timeout: int = TIMEOUT, 
+                 log_debug: bool = False, force_pyvisa_py: bool = False):
         """
         Initialize HP8116A driver.
         Args:
@@ -56,7 +57,7 @@ class HP8116A(BaseAWG):
             timeout: GPIB timeout in milliseconds
             log_debug: Enable debug logging
         """
-        super().__init__(log_debug=log_debug)
+        super().__init__(log_debug=log_debug, force_pyvisa_py=force_pyvisa_py)
         self.printdebug("init")
         self.port = port
         self.timeout = timeout
@@ -98,7 +99,7 @@ class HP8116A(BaseAWG):
             return
             
         try:
-            self.resource_manager = pyvisa.ResourceManager()
+            self.resource_manager = pyvisa.ResourceManager("@py" if self.force_pyvisa_py else "")
             gpib_addr = self._get_gpib_address_string()
             self.printdebug(f"Connecting to '{gpib_addr}'")
             

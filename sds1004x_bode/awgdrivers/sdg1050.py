@@ -36,7 +36,9 @@ class SDG1050(BaseAWG):
 
     SHORT_NAME = "sdg1050"
 
-    def __init__(self, port: str = "", baud_rate: int = None, timeout: int = TIMEOUT, log_debug: bool = False):
+    def __init__(self, port: str = "", baud_rate: int = None, 
+                 timeout: int = TIMEOUT, log_debug: bool = False, 
+                 force_pyvisa_py: bool = False):
         """Initialize the SDG1050 driver.
         
         Args:
@@ -45,7 +47,7 @@ class SDG1050(BaseAWG):
             timeout: Timeout in seconds
             log_debug: Enable debug logging
         """
-        super().__init__(log_debug=log_debug)
+        super().__init__(log_debug=log_debug, force_pyvisa_py=force_pyvisa_py)
         self.printdebug("init")
         self.port = port
         self.rm = None
@@ -94,7 +96,7 @@ class SDG1050(BaseAWG):
     def _connect(self):
         """Establish connection to the SDG1050."""
         self.printdebug("connecting")
-        self.rm = visa.ResourceManager()
+        self.rm = visa.ResourceManager("@py" if self.force_pyvisa_py else "")
         
         # Handle both full VISA strings and raw serial ports
         if self.port.startswith('ASRL') or '::' in self.port:

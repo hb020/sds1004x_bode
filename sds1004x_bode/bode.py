@@ -5,7 +5,7 @@ Created on May 5, 2018
 '''
 
 import argparse
-import pyvisa
+import pyvisa as visa
 from awg_server import AwgServer
 from awg_factory import awg_factory
 
@@ -13,9 +13,9 @@ DEFAULT_AWG = "dummy"
 DEFAULT_PORT = "/dev/ttyUSB0"
 DEFAULT_BAUD_RATE = 19200
 
-def show_visa_instruments():
+def show_visa_instruments(force_pyvisa_py: bool = False):
     print("Scanning for VISA resources...")
-    rm = pyvisa.ResourceManager()
+    rm = visa.ResourceManager("@py" if force_pyvisa_py else "")
     resources = rm.list_resources()
     resources = sorted(resources)
     resources = [r for r in resources if not r.startswith("ASRL/dev/cu.")]  # skip known bad devices that very likely not SCPI compatible
@@ -60,6 +60,7 @@ def main():
     parser.add_argument('-v', default=0, help="Verbosity level. Specify one or more 'v' for more detail in the logs.", action="count", dest="verbosity")
     parser.add_argument('-1', default=False, help="Run only once: exit after one bode plot is done. If not specified: use Ctrl-C to stop the program.", dest="runonce", action="store_true", required=False)
     parser.add_argument('-old', default=False, help="If you have old firmware on the scope, you must set this. It forces changing of the VXI-11 ports at every request.", dest="old_firmware", action="store_true", required=False)
+    parser.add_argument('-py', '--pyvisa-py', default=False, help="Force the use of PyVISA-Py.", dest="pyvisa_py", action="store_true", required=False)
     args = parser.parse_args()
 
     # Extract AWG name from parameters
@@ -77,6 +78,7 @@ def main():
     log_commands = False
     log_mapping = False
     log_VXI = False
+    force_pyvisa_py = args.pyvisa_py
     
     if args.verbosity > 0:
         log_commands = True    
@@ -86,7 +88,7 @@ def main():
         log_mapping = True
         
     if awg_name == detect_str:
-        show_visa_instruments()
+        show_visa_instruments(force_pyvisa_py = force_pyvisa_py)
         return
 
     # Initialize AWG
@@ -94,7 +96,7 @@ def main():
     print(f"AWG: {awg_name}")
     print(f"Port: {awg_port}")
     awg_class = awg_factory.get_class_by_name(awg_name)
-    awg = awg_class(port=awg_port, baud_rate=awg_baud_rate, log_debug=log_commands)
+    awg = awg_class(port=awg_port, baud_rate=awg_baud_rate, log_debug=log_commands, force_pyvisa_py=force_pyvisa_py)
     awg.initialize()
     print(f"IDN: {awg.get_id()}")
     print("AWG initialized.")

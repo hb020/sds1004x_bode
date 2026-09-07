@@ -50,8 +50,9 @@ class BK4075(BaseAWG):
     '''
     SHORT_NAME = "bk4075"
 
-    def __init__(self, port: str = "", baud_rate: int = DEFAULT_BAUD_RATE, timeout: int = TIMEOUT, log_debug: bool = False):
-        super().__init__(log_debug=log_debug)
+    def __init__(self, port: str = "", baud_rate: int = DEFAULT_BAUD_RATE, timeout: int = TIMEOUT,
+                 log_debug: bool = False, force_pyvisa_py: bool = False):
+        super().__init__(log_debug=log_debug, force_pyvisa_py=force_pyvisa_py)
         self.printdebug("init")
         if baud_rate not in BAUD_RATES:
             raise ValueError("Baud rate must be 2400, 4800, 9600 or 19200 bps.")

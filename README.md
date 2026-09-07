@@ -111,14 +111,14 @@ The program must be run in a command line terminal.
 In order to run it, change the current path to the directory where you downloaded the source code. Then write the following command:
 
 ```sh
-python3 sds1004x_bode <awg_name> [<port>] [<baud_rate>] [-h] [-v[v[v]]] [-1] [-old]
+python3 sds1004x_bode <awg_name> [<port>] [<baud_rate>] [-h] [-v[v[v]]] [-1] [-old] [-py]
 ```
 
 or (legacy form):
 
 ```sh
 cd sds1004x_bode
-python3 bode.py <awg_name> [<port>] [<baud_rate>] [-h] [-v[v[v]]] [-1] [-old]
+python3 bode.py <awg_name> [<port>] [<baud_rate>] [-h] [-v[v[v]]] [-1] [-old] [-py]
 ```
 
 where
@@ -161,6 +161,8 @@ USB0::6833::1603::DG9A224983246::0::INSTR   Rigol Technologies,DG992,DG9A2249832
 * Use ```-1``` to exit the program after one bode plot is done. It looks for the "OUTP OFF" command or inactivity for more than 10 seconds after a start of a bode plot. If ```-1``` is not specified, the program will run until Ctrl-C is used.
 
 * Use ```-old``` if you have an old firmware on the scope. Older firmware required continuous changing of the VXI-11 ports. The newer firmware does not require this.
+
+* Use ```-py``` or ```--pyvisa-py``` if you have other VISA backends (like NI-VISA), and want to use the pure python backend, as it is lighter and has less dependencies.
 
 * Use ```-v``` or ```-vv``` or ```-vvv``` for logging verbosity. The first logs the driver info, the next also logs VXI-11 info, the last also logs port mapper info. By default, only the startup phase and the incoming commands are logged.
 
@@ -227,7 +229,7 @@ If you get an error message with  ```Address already in use. Cannot use ... for 
 If you see a warning message with `VI_WARN_CONFIG_NLOADED`, that probably means you have installed a VISA driver (like NI-VISA or Keysight or..), and have not provided a config file for it. This program does not need a VISA driver, since PyVISA-py is installed. So in order to suppress the warning message, either:
 
 * add the config file (sorry, that depends on the driver you installed, too many variants out there)
-* modify the line ``visa.ResourceManager()`` with ``visa.ResourceManager("@py")``, to force the loading of PyVISA-py.
+* ise ```-py``` to force the loading of PyVISA-py.
 * remove the VISA driver, unless you need that driver with other tools.
 
 ## Support for other AWGs and Contributing
@@ -250,10 +252,14 @@ For some pointers on how to use this software with a USB AWG that you want to co
 
 ## Changelog
 
+### 2026-09-07
+
+* allow forcing of PyVISA-py as VISA backend.
+
 ### 2026-08-21
 
 * made VXI stack slightly more compliant, in preparation for new pyvisa-py version that is implicitly harsher on VXI-11 compliance.
-* more robust connection handling
+* more robust connection handling.
 
 ### 2026-05-01
 
@@ -262,11 +268,11 @@ For some pointers on how to use this software with a USB AWG that you want to co
 ### 2026-03-24
 
 * By default disabling the port changing that was required for older scope firmware. It was causing problems with slower PCs and is not needed if you have the latest scope firmware (which is recommended). Use `-old` to re-enable it.
-* Added support for Agilent/Keysight 35500B/33600A series
+* Added support for Agilent/Keysight 35500B/33600A series.
 
 ### 2026-03-16
 
-* added HP 8116A AWG
+* added HP 8116A AWG.
   
 ### 2026-03-12
 
@@ -275,27 +281,27 @@ For some pointers on how to use this software with a USB AWG that you want to co
 
 ### 2025-08-11
 
-* added JunTek/JOY-IT PSG9080 driver
+* added JunTek/JOY-IT PSG9080 driver.
 
 ### 2025-06-04
 
-* added Rigol DG800 Pro driver
-* added support for graceful exit after one bode plot (parameter ```-1```)
+* added Rigol DG800 Pro driver.
+* added support for graceful exit after one bode plot (parameter ```-1```).
 
 ### 2025-01-23
 
-* added utg900e driver
+* added utg900e driver.
   
 ### 2025-01-16
 
-* easier testing of new drivers
+* easier testing of new drivers.
 
 ### 2024-09-19
 
 * new driver for newer fy6900 devices.
 * better serial port handling for some drivers.
 * better VISA compliance: no longer a need to specify UDP or not. This version listens on both UDP and TCP and is therefore compatible with most VISA tools and older plus newer Siglent scopes.
-* better logging handling, now available in 4 verbosity levels
+* better logging handling, now available in 4 verbosity levels.
 
 ### 2024-09-06
 
@@ -305,16 +311,16 @@ For some pointers on how to use this software with a USB AWG that you want to co
 ### 2024-08-25
 
 * lint cleanup.
-* added generic fy gen support (FY2300, FY6600, FY6800, FY6900 and probably more) from the [3tch-a-sketch and mattwach forks](https://github.com/3tch-a-sketch/sds1004x_bode)
+* added generic fy gen support (FY2300, FY6600, FY6800, FY6900 and probably more) from the [3tch-a-sketch and mattwach forks](https://github.com/3tch-a-sketch/sds1004x_bode).
 * readme clarifications.
 
 ### 2024-06-27
 
-* Added support for Uni-Trend UTG1000x
+* Added support for Uni-Trend UTG1000x.
 
 ### 2024-05-01
 
-* The program supports the SDS800X-HD series (that uses UDP instead of TCP for the port mapping, and has trouble with re-using the VXI port)
+* The program supports the SDS800X-HD series (that uses UDP instead of TCP for the port mapping, and has trouble with re-using the VXI port).
 * Added support for the Rigol DG800/DG900 series AWGs over Ethernet. USB was not tested, but should work. You might even use this implementation to connect to other Ethernet or USB connected SCPI 1992.0 standard compatible devices.
 
 ### 2023-11-13

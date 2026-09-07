@@ -33,9 +33,10 @@ class UTG1000x(BaseAWG):
 
     SHORT_NAME = "utg1000x"
 
-    def __init__(self, port: str = "", baud_rate: int = None, timeout: int = TIMEOUT, log_debug: bool = False):
+    def __init__(self, port: str = "", baud_rate: int = None, 
+                 timeout: int = TIMEOUT, log_debug: bool = False, force_pyvisa_py: bool = False):
         """baud_rate parameter is ignored."""
-        super().__init__(log_debug=log_debug)
+        super().__init__(log_debug=log_debug, force_pyvisa_py=force_pyvisa_py)
         self.printdebug("init")
         self.port = port
         self.rm = None
@@ -58,7 +59,7 @@ class UTG1000x(BaseAWG):
             return False
 
     def _connect(self):
-        self.rm = visa.ResourceManager()
+        self.rm = visa.ResourceManager("@py" if self.force_pyvisa_py else "")
         self.m = self.rm.open_resource(self.port)
         self.m.timeout = self.timeout * 1000
 

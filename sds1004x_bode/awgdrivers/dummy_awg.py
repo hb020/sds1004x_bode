@@ -15,8 +15,9 @@ class DummyAWG(BaseAWG):
     '''
     SHORT_NAME = "dummy"
 
-    def __init__(self, port: str = "", baud_rate: int = 115200, timeout: int = 5, log_debug: bool = False):
-        super().__init__(log_debug=log_debug)
+    def __init__(self, port: str = "", baud_rate: int = 115200, timeout: int = 5,
+                 log_debug: bool = False, force_pyvisa_py: bool = False):
+        super().__init__(log_debug=log_debug, force_pyvisa_py=force_pyvisa_py)
         self.printdebug("init")
 
     def disconnect(self):

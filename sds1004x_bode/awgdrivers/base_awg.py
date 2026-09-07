@@ -11,9 +11,12 @@ class BaseAWG(object):
     '''
     SHORT_NAME = "base_awg"
 
-    def __init__(self, port: str = "", baud_rate: int = 115200, timeout: int = 5, log_debug: bool = False):
+    def __init__(self, port: str = "", baud_rate: int = 115200, 
+                 timeout: int = 5, log_debug: bool = False,
+                 force_pyvisa_py: bool = False):
         self.log_debug = log_debug
-        
+        self.force_pyvisa_py = force_pyvisa_py
+
     def printdebug(self, msg: str):
         if self.log_debug:
             print(f"{self.__class__.SHORT_NAME}: {msg}")
