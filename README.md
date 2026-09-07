@@ -141,18 +141,18 @@ where
   
   If you need a Visa string but do not know it, you can use the ```visadetect``` option for ```<awg_name>``` to detect it, like this:
 
-```text
-> python3 sds1004x_bode visadetect
-Scanning for VISA resources...
-VISA Resources found: 
-Address                                     Identification
-------------------------------------------- ------------------------------------------------------------
-TCPIP::192.168.15.102::INSTR                Siglent Technologies,SDS824X HD,SDS08B0C898501,3.8.12.1.1.6.5
-TCPIP::192.168.15.104::INSTR                Rigol Technologies,DG992,DG9A224983246,00.02.06.00.01
-TCPIP::192.168.15.106::INSTR                Ethernet2GPIB Gateway v2.3 (AR488 v0.53.39)
-TCPIP::192.168.15.111::INSTR                Riden,RD6030,00005073,1.47
-USB0::6833::1603::DG9A224983246::0::INSTR   Rigol Technologies,DG992,DG9A224983246,00.02.06.00.01
-```
+  ```text
+  > python3 sds1004x_bode visadetect
+  Scanning for VISA resources...
+  VISA Resources found: 
+  Address                                     Identification
+  ------------------------------------------- ------------------------------------------------------------
+  TCPIP::192.168.15.102::INSTR                Siglent Technologies,SDS824X HD,SDS08B0C898501,3.8.12.1.1.6.5
+  TCPIP::192.168.15.104::INSTR                Rigol Technologies,DG992,DG9A224983246,00.02.06.00.01
+  TCPIP::192.168.15.106::INSTR                Ethernet2GPIB Gateway v2.3 (AR488 v0.53.39)
+  TCPIP::192.168.15.111::INSTR                Riden,RD6030,00005073,1.47
+  USB0::6833::1603::DG9A224983246::0::INSTR   Rigol Technologies,DG992,DG9A224983246,00.02.06.00.01
+  ```
 
 * ```<baud_rate>``` The serial baud rate as defined in the AWG settings. ```bk4075``` uses a default speed of 19200. All others run on 115200 baud or on Visa, and this parameter will be ignored for them.
 
@@ -166,59 +166,59 @@ USB0::6833::1603::DG9A224983246::0::INSTR   Rigol Technologies,DG992,DG9A2249832
 
 * Use ```-v``` or ```-vv``` or ```-vvv``` for logging verbosity. The first logs the driver info, the next also logs VXI-11 info, the last also logs port mapper info. By default, only the startup phase and the incoming commands are logged.
 
-If the program starts successfully, and with ```-vvv```, you'll see the following output:
-
-```text
-Initializing AWG...
-AWG: jds6600
-Port: /dev/ttyUSB0
-IDN: jds6600
-AWG initialized.
-Starting AWG server...
-Portmapper: Listening to UDP and TCP ports on 0.0.0.0:111
-VXI-11: Listening to TCP port 0.0.0.0:9010
-```
-
-After starting the program, follow the usual procedure of creating Bode plot. After starting the plotting, the program output will be similar to the following (when using ```-vvv```):
-
-```text
-UDPPortmapper: Incoming connection from 192.168.14.27:55916.
-UDPPortmapper: Sending to TCP port 9009
-VXI-11 CREATE_LINK, SCPI command: inst0
-VXI-11 DEVICE_WRITE, SCPI command: IDN-SGLT-PRI?
-VXI-11 DEVICE_READ, SCPI command: None
-VXI-11 DESTROY_LINK, SCPI command: None
-VXI-11 moving to TCP port 9010
-UDPPortmapper: Incoming connection from 192.168.14.27:48446.
-UDPPortmapper: Sending to TCP port 9010
-VXI-11 CREATE_LINK, SCPI command: inst0
-VXI-11 DEVICE_WRITE, SCPI command: C1:OUTP LOAD,50;BSWV WVTP,SINE,PHSE,0,FRQ,15000,AMP,2,OFST,0;OUTP ON
-> C1:OUTP LOAD,50;BSWV WVTP,SINE,PHSE,0,FRQ,15000,AMP,2,OFST,0;OUTP ON
-VXI-11 DESTROY_LINK, SCPI command: None
-VXI-11 moving to TCP port 9009
-UDPPortmapper: Incoming connection from 192.168.14.27:50264.
-UDPPortmapper: Sending to TCP port 9009
-VXI-11 CREATE_LINK, SCPI command: inst0
-VXI-11 DEVICE_WRITE, SCPI command: C1:BSWV?
-> C1:BSWV?
-VXI-11 DEVICE_READ, SCPI command: None
-VXI-11 DESTROY_LINK, SCPI command: None
-VXI-11 moving to TCP port 9010
-UDPPortmapper: Incoming connection from 192.168.14.27:55976.
-UDPPortmapper: Sending to TCP port 9010
-VXI-11 CREATE_LINK, SCPI command: inst0
-VXI-11 DEVICE_WRITE, SCPI command: C1:BSWV FRQ,10
-> C1:BSWV FRQ,10
-VXI-11 DESTROY_LINK, SCPI command: None
-VXI-11 moving to TCP port 9009
-UDPPortmapper: Incoming connection from 192.168.14.27:48088.
-UDPPortmapper: Sending to TCP port 9009
-VXI-11 CREATE_LINK, SCPI command: inst0
-VXI-11 DEVICE_WRITE, SCPI command: C1:BSWV FRQ,20
-> C1:BSWV FRQ,20
-VXI-11 DESTROY_LINK, SCPI command: None
-VXI-11 moving to TCP port 9010
-```
+  If the program starts successfully, and with ```-vvv```, you'll see the following output:
+  
+  ```text
+  Initializing AWG...
+  AWG: jds6600
+  Port: /dev/ttyUSB0
+  IDN: jds6600
+  AWG initialized.
+  Starting AWG server...
+  Portmapper: Listening to UDP and TCP ports on 0.0.0.0:111
+  VXI-11: Listening to TCP port 0.0.0.0:9010
+  ```
+  
+  After starting the program, follow the usual procedure of creating Bode plot. After starting the plotting, the program output will be similar to the following (when using ```-vvv```):
+  
+  ```text
+  UDPPortmapper: Incoming connection from 192.168.14.27:55916.
+  UDPPortmapper: Sending to TCP port 9009
+  VXI-11 CREATE_LINK, SCPI command: inst0
+  VXI-11 DEVICE_WRITE, SCPI command: IDN-SGLT-PRI?
+  VXI-11 DEVICE_READ, SCPI command: None
+  VXI-11 DESTROY_LINK, SCPI command: None
+  VXI-11 moving to TCP port 9010
+  UDPPortmapper: Incoming connection from 192.168.14.27:48446.
+  UDPPortmapper: Sending to TCP port 9010
+  VXI-11 CREATE_LINK, SCPI command: inst0
+  VXI-11 DEVICE_WRITE, SCPI command: C1:OUTP LOAD,50;BSWV WVTP,SINE,PHSE,0,FRQ,15000,AMP,2,OFST,0;OUTP ON
+  > C1:OUTP LOAD,50;BSWV WVTP,SINE,PHSE,0,FRQ,15000,AMP,2,OFST,0;OUTP ON
+  VXI-11 DESTROY_LINK, SCPI command: None
+  VXI-11 moving to TCP port 9009
+  UDPPortmapper: Incoming connection from 192.168.14.27:50264.
+  UDPPortmapper: Sending to TCP port 9009
+  VXI-11 CREATE_LINK, SCPI command: inst0
+  VXI-11 DEVICE_WRITE, SCPI command: C1:BSWV?
+  > C1:BSWV?
+  VXI-11 DEVICE_READ, SCPI command: None
+  VXI-11 DESTROY_LINK, SCPI command: None
+  VXI-11 moving to TCP port 9010
+  UDPPortmapper: Incoming connection from 192.168.14.27:55976.
+  UDPPortmapper: Sending to TCP port 9010
+  VXI-11 CREATE_LINK, SCPI command: inst0
+  VXI-11 DEVICE_WRITE, SCPI command: C1:BSWV FRQ,10
+  > C1:BSWV FRQ,10
+  VXI-11 DESTROY_LINK, SCPI command: None
+  VXI-11 moving to TCP port 9009
+  UDPPortmapper: Incoming connection from 192.168.14.27:48088.
+  UDPPortmapper: Sending to TCP port 9009
+  VXI-11 CREATE_LINK, SCPI command: inst0
+  VXI-11 DEVICE_WRITE, SCPI command: C1:BSWV FRQ,20
+  > C1:BSWV FRQ,20
+  VXI-11 DESTROY_LINK, SCPI command: None
+  VXI-11 moving to TCP port 9010
+  ```
 
 When done, you can stop the process via Ctrl-C. You can also specify the parameter `-1` to stop the process once one bode plot is done .
 
