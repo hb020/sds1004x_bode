@@ -224,7 +224,11 @@ When done, you can stop the process via Ctrl-C. You can also specify the paramet
 
 If you get an error message with  ```Address already in use. Cannot use ... for listening.```, use ```netstat``` or ```lsof``` to look what process is already using the port. It might be because you have nfs.server running via rpcbind. For that case, just disable it while running the bode plot: ```sudo systemctl stop rpcbind.socket rpcbind.service```.
 
-If you see a warning message with `VI_WARN_CONFIG_NLOADED`, that probably means you have installed a lower level VISA driver, and have not provided a config file for it. Know that it is unlikely that you'd need a VISA driver (apart from the above mentioned python packages). So in order to suppress the warning message, either add the config file (sorry, that depends on the driver you installed, too many variants out there), or better, remove the VISA driver, unless you need that driver with other tools.
+If you see a warning message with `VI_WARN_CONFIG_NLOADED`, that probably means you have installed a VISA driver (like NI-VISA or Keysight or..), and have not provided a config file for it. This program does not need a VISA driver, since PyVISA-py is installed. So in order to suppress the warning message, either:
+
+* add the config file (sorry, that depends on the driver you installed, too many variants out there)
+* modify the line ``visa.ResourceManager()`` with ``visa.ResourceManager("@py")``, to force the loading of PyVISA-py.
+* remove the VISA driver, unless you need that driver with other tools.
 
 ## Support for other AWGs and Contributing
 
