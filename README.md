@@ -111,14 +111,14 @@ The program must be run in a command line terminal.
 In order to run it, change the current path to the directory where you downloaded the source code. Then write the following command:
 
 ```sh
-python3 sds1004x_bode <awg_name> [<port>] [<baud_rate>] [-h] [-v[v[v]]] [-1]
+python3 sds1004x_bode <awg_name> [<port>] [<baud_rate>] [-h] [-v[v[v]]] [-1] [-old]
 ```
 
 or (legacy form):
 
 ```sh
 cd sds1004x_bode
-python3 bode.py <awg_name> [<port>] [<baud_rate>] [-h] [-v[v[v]]] [-1]
+python3 bode.py <awg_name> [<port>] [<baud_rate>] [-h] [-v[v[v]]] [-1] [-old]
 ```
 
 where
